@@ -3,12 +3,13 @@ siguientes actividades:
 ACTIVIDAD 1 ! =}
 
 program NumAleatorio;
-var ale: integer;
+var 
+    ale: integer;
 begin
-randomize;
-ale := random (100);
-writeln ('El número aleatorio generado es: ', ale);
-readln;
+    randomize;
+    ale := random (100);
+    writeln ('El número aleatorio generado es: ', ale);
+    readln;
 end.
 
 {────୨ৎ────
