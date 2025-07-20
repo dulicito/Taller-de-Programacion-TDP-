@@ -1,0 +1,19 @@
+{ Descargar el archivo ProgramaNumAleatorio.pas y realizar las
+siguientes actividades:
+ACTIVIDAD 1 ! =}
+
+program NumAleatorio;
+var ale: integer;
+begin
+randomize;
+ale := random (100);
+writeln ('El número aleatorio generado es: ', ale);
+readln;
+end.
+
+{────୨ৎ────
+a) Compile y ejecute el programa descargado
+b) Responda ¿Qué hace el programa?
+*Genera numeros de 0 a 99, el cual lo asigna a la variable ale, para
+luego imprimirlo en pantalla.
+────୨ৎ────}
