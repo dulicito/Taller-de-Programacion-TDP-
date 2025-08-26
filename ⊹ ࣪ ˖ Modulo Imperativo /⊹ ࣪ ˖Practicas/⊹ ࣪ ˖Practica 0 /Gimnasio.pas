@@ -12,10 +12,38 @@
   el resultado desde el programa principal.
   d) implemente un modulo que reciba la lista generada en a) y retorne la 
   actividad con mayor cantidad de asistencias. Mostrar el resultado desde
-  el programa principal. }
+  el programa principal.}
 
 
 program gimnasio;
+const
+    maxcli: 500;
+    maxact: 5;
+    maxdia: 31;
+    maxmes: 12;
+type
+    dias: 1..maxdia;
+    meses: 1..maxmes;
+    clientes: 1..maxcli;
+    acts: 1..maxact;
+    Asistencia: record
+        dia:dias;
+        mes:meses;
+        anio:integer;
+        numcli:clientes;
+        act: acts;
+    end;
+    listaclientes=  ^nodo
+        nodo= record
+            info:Asistencia;
+            sig: listaclientes;
+var
+    l: listaclientes;
 begin
-  
+  l:= nil; //inicializo la lista en nil 
+  cant:= 0
+  cargarlista(l)//modulo A 
+  imprimir(l)//modulo B 
+  asistenciasdelcliente(l,num,cant);//modulo C 
+  writeln('la cantidad de asistencias del cliente:' ,num,', es',cant); //modulo C 
 end.
