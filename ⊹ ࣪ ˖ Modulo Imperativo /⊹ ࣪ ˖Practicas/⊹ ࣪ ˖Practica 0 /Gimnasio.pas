@@ -37,13 +37,16 @@ type
         nodo= record
             info:Asistencia;
             sig: listaclientes;
+    vectoractividad: array[acts]of integer;
 var
-    l: listaclientes;
+    l: listaclientes; v: vectoractividad; cant,num: integer; 
 begin
   l:= nil; //inicializo la lista en nil 
   cant:= 0
-  cargarlista(l)//modulo A 
+  cargarlista(l,v)//modulo A , nota: inicializar vector en el modulo 
   imprimir(l)//modulo B 
+  writeln('Ingrese un numero de cliente'); readln(num);
   asistenciasdelcliente(l,num,cant);//modulo C 
   writeln('la cantidad de asistencias del cliente:' ,num,', es',cant); //modulo C 
+  writeln('la actividad con mayor asistencias es: ',max(v));
 end.
