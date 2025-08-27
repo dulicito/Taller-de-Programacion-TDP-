@@ -14,6 +14,7 @@
   actividad con mayor cantidad de asistencias. Mostrar el resultado desde
   el programa principal.}
 
+nota: esta mal ksjdjsdk, despues lo corrijo
 
 program gimnasio;
 const
