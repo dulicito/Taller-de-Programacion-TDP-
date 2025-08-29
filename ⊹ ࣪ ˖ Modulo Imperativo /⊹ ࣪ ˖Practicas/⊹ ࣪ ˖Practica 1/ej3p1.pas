@@ -13,7 +13,7 @@ métodos vistos en la teoría.
 d. Muestre el código de película con mayor puntaje y el código de película con menor puntaje,
 del vector obtenido en el punto c). }
 
-//hacer luego :p
+//nota: revisar, se usa un vector de listas
 program ej3p1;
 const
 	maxgen: 8;
