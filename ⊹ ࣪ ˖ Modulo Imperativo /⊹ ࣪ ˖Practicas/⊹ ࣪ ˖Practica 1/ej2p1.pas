@@ -13,8 +13,8 @@
     
     program ej2p1;
     const
-        maxofi: 300;
-        corte: -1;
+        maxofi= 300;
+        corte= -1;
     type
         oficina = record
             codigo:integer;
@@ -24,23 +24,29 @@
         vector= array[1..maxofi] of oficina;
         
 
-    procedure leeroficina(var r: oficina)
+    procedure leeroficina(var r: oficina);
     begin
+		writeln('ingrese el codigo de la oficina');
         readln(r. codigo);
-        if (r.codigo <> -1)then 
+        if (r.codigo <> corte)then begin
+			writeln('ingrese el dni del propietario');
             readln(r.dni);
+            writeln('ingrese el valor de la expensa');
             readln(r.valorexpensa);
         end; 
     end;
+    
     procedure generarVector (var v:vector; var dl:integer); //INCISO A 
     var 
         r:oficina; 
     begin
         dl:= 0; 
+        writeln('ingrese los datos de la oficina: ', dl+1);
         leeroficina(r);
-        while (r.codigo <> -1) or (dl < maxofi)do begin
+        while (r.codigo <> corte) and (dl < maxofi)do begin
             dl:= dl + 1;
             v[dl]:= r;
+            writeln('ingrese los datos de la oficina: ',dl+1);
             leeroficina(r);
         end; 
     end;
@@ -50,7 +56,7 @@
         i,j:integer;
         actual:oficina; //actual es del tipo de datos que guarda el vector
      begin
-        for (i:= 2 to dl) do begin
+        for i:= 2 to dl do begin
             actual:=v[i];
             j:=i-1;
             while (j>0) and (v[j].codigo > actual.codigo)do begin
@@ -61,7 +67,7 @@
         end;
      end;
 
-    procedure seleccion (var v:vector; dl:integer;) //MODULO C 
+    procedure seleccion (var v:vector; dl:integer); //MODULO C 
     Var
         i,j,pos:integer;
         item:oficina; //item es del tipo de datos que guarda el vector
@@ -85,4 +91,4 @@
         generarVector(v,dl);//modulo a 
         inserccion(v,dl);//modulo b 
         seleccion(v,dl);//modulo c 
-    end;
+    end.
