@@ -35,6 +35,4 @@ begin
     writeln('Ingrese un numero para convertirlo en decimal');
     readln(num);
   end;
-
-  writeln('Programa finalizado.');
 end.
