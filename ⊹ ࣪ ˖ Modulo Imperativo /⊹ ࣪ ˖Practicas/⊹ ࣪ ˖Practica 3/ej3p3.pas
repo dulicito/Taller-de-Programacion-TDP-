@@ -143,7 +143,7 @@ begin
 	a:= nil;
 	randomize;
 	cargarAlumnos(a); //INCISO A 
-	writeln('La cantidad de alumnos con legajo impar fue: ',impar(a); //INCISO B  {ahora que lo pienso puede ser un procedure pero mmm dijo el mudo, digo, dsp lo modifico
+	writeln('La cantidad de alumnos con legajo impar fue: ',impar(a); //INCISO B  {ahora que lo pienso puede ser un procedure pero mmm dijo el mudo, digo, dsp veo
 	informar(a); //INCISO C 
 	writeln('Ingrese un valor: '); readln(num);
 	supera(a,num); //INCISO D
