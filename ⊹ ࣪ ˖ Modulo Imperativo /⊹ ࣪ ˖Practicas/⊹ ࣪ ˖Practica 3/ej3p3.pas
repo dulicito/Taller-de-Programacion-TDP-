@@ -16,10 +16,8 @@ d. Un módulo que reciba la estructura generada en a. y un valor real. Este mód
 retornar los legajos y promedios de los alumnos cuyo promedio supera el valor ingresado.}
 
 
-{nota: terminar de hacer}
 
 program ej3p3;
-const
 type
 	final=record
 		codigo_mate:integer;
@@ -27,18 +25,18 @@ type
 		nota:real;
 	end;
 	
-	lista=^nodo
-		nodo=Record;
+	lista=^nodoA;
+		nodoA=Record
 			info:final;
 			sig:lista;
 		end;
-	alumno=Record;
+	alumno=Record
 		legajo:integer;
 		finales: lista;
 	end;
 	
-	arbol=^nodo
-		nodo=Record
+	arbol=^nodoB;
+		nodoB=Record
 			info:alumno;
 			hi:arbol;
 			hd:arbol;
@@ -55,11 +53,12 @@ guardarse los finales que rindió en una lista.}
 	
 procedure agregar (l:lista);
 var
-    aux:lista;
+    aux:lista; fecha:string;
 begin
     new(aux);
     aux^.info.codigo_mate:= random(1000)+1;
-    aux^.info.fecha:= random(1000);
+    readln(fecha);
+    aux^.info.fecha:= fecha;
     aux^.info.nota:= random(1000);
     aux^.sig:= l;
     l:= aux;
@@ -68,29 +67,32 @@ end;
     
 procedure leeralumno(var a:alumno);
 var
-    cant: integer;
+    cant: integer; i:integer;
 begin
     writeln('Ingrese el legajo del alumno: ');
     readln(a.legajo);
-    writeln('Ingrese la cantidad de finales rendidos por el alumno');
-    readln(cant);
-    while (cant <> 0)do begin 
-        a^.finales:= agregar(a^.finales);
-        cant:= cant -1;
+    if (a.legajo <> 0)then begin
+        writeln('Ingrese la cantidad de finales rendido por el alumno: ',a.legajo);
+        readln(cant);
+        a.finales:= nil;
+        for i:= 1 to cant do 
+            agregar(a.finales);
     end;
 end;
 
 
-procedure agregarnodo(var a:arbol; p:alumno );
+procedure agregarnodo(var a:arbol; p:alumno);
 begin
-    if (a = nil)then
-        new(a)
+    if (a = nil)then begin
+        new(a);
         a^.info:= p;
         a^.hi:= nil;
         a^.hd:= nil;
-    else
-        if (p.legajo <= a^.legajo) then agregarnodo(a^.hi,p)
+    end 
+    else begin
+        if (p.legajo <= a^.info.legajo) then agregarnodo(a^.hi,p)
         else agregarnodo(a^.hd, p);
+    end
 end;
 
 
@@ -131,10 +133,68 @@ end;
 su cantidad de finales aprobados (nota mayor o igual a 4).}
 
 
+function contarAprobados(l: lista): integer;
+begin
+  if l = nil then
+    contarAprobados := 0
+  else if l^.info.nota >= 4 then
+    contarAprobados := 1 + contarAprobados(l^.sig)
+  else
+    contarAprobados := contarAprobados(l^.sig);
+end;
 
+procedure informar(a: arbol);
+var
+  cantAprob: integer;
+begin
+  if a <> nil then
+  begin
+    informar(a^.hi);
+    cantAprob := contarAprobados(a^.info.finales);
+    writeln('Legajo: ', a^.info.legajo, ' - Aprobados: ', cantAprob);
+    informar(a^.hd);
+  end;
+end;
 
 {---------------------------------------------------------------------}
 
+{d. Un módulo que reciba la estructura generada en a. y un valor real. Este módulo debe
+retornar los legajos y promedios de los alumnos cuyo promedio supera el valor ingresado.}
+
+procedure promedioFinales(l: lista; var suma: real; var cant: integer);
+begin
+	suma := 0;
+	cant := 0;
+	while l <> nil do
+	begin
+		suma := suma + l^.info.nota;
+		cant := cant + 1;
+		l := l^.sig;
+	end;
+end;
+
+procedure supera(a: arbol; num: real);
+var
+	suma: real;
+	cant: integer;
+	prom: real;
+begin
+	if a <> nil then
+	begin
+		supera(a^.hi, num);
+		promedioFinales(a^.info.finales, suma, cant);
+		if (cant > 0) then
+		begin
+			prom := suma / cant;
+			if prom > num then
+				writeln('Legajo: ', a^.info.legajo, ' - Promedio: ', prom:2:2);
+		end;
+		supera(a^.hd, num);
+	end;
+end;
+
+
+{---------------------------------------------------------------------}
 
 
 var
@@ -143,8 +203,8 @@ begin
 	a:= nil;
 	randomize;
 	cargarAlumnos(a); //INCISO A 
-	writeln('La cantidad de alumnos con legajo impar fue: ',impar(a); //INCISO B  {ahora que lo pienso puede ser un procedure pero mmm dijo el mudo, digo, dsp veo
+	writeln('La cantidad de alumnos con legajo impar fue: ',impar(a)); //INCISO B  {ahora que lo pienso puede ser un procedure pero mmm dijo el mudo, digo, dsp veo
 	informar(a); //INCISO C 
 	writeln('Ingrese un valor: '); readln(num);
 	supera(a,num); //INCISO D
-end;
+end.
