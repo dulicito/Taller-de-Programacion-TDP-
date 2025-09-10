@@ -18,7 +18,7 @@ se encontró la oficina.
 
 d) Un módulo recursivo que retorne el monto total acumulado de las expensas.}
 
-program ej1pracAD;
+program ej1pAD;
 const
     DF=300;
     corte=0;
