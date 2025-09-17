@@ -152,7 +152,16 @@ end;
 			  al monto ingresado por parametro 
 	utilizo una funcion
 	* 
-caso base: arbol vacio? }
+explicacion: 
+
+Caso base → si el árbol está vacío, devuelvo 0.
+
+Encontré el DNI → recorro la lista de compras, cuento cuántas facturas tienen monto > montoIngresado.
+
+DNI menor → sigo buscando en el hijo izquierdo.
+
+DNI mayor → sigo buscando en el hijo derecho.
+*  }
 	
 function cantfacturas(a: arbol; monto: real ; dniBuscado: integer): integer;
 var
