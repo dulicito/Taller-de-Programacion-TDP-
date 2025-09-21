@@ -34,5 +34,4 @@
 
 <a href="https://www.youtube.com/watch?v=0dXSmfKcrhI&list=PL5dqmXOcJSUpBrwCN1A-kkkyGqANquoGC" target="_blank">Teorias/Practicas (Videos)</a>
 
-video del hombre tecleando JAJSJASJJ 
 
