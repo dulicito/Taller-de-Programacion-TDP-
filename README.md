@@ -1,6 +1,6 @@
-# Taller de Programacion-TDP  <img src="https://i.pinimg.com/736x/67/4b/15/674b152fdeeaefb28f7b47210c029566.jpg" width="40" height="40">
+# Taller de Programacion-TDP  <img src="https://i.pinimg.com/736x/61/b2/87/61b287df6e65261ada6f6b274159881b.jpg" width="40" height="40">
 
-<img src="https://i.pinimg.com/originals/b7/fe/09/b7fe0977bad1950393d6450f32a37ca0.gif" width="650" height="100">
+<img src="https://i.pinimg.com/736x/80/f2/78/80f278dbe03db7e3d4ec4f8efec2cc46.jpg" width="" height="">
 
 
 > ⋆. 𐙚 ˚resoluciones propias sobre ejercicios de la materia 'taller de programación' dictada en el 2do cuatrimestre de primer año.
@@ -9,7 +9,7 @@
 <a href="https://drive.google.com/drive/folders/1Zima9quYKk92Z_nyHdGYrtXfBaZAGnwu" target="_blank">ᝰ.ᐟ Drive (Material Cursada Completa)</a>
 
 
-## ⊹ ࣪ ˖ MODULO <font color="">IMPERATIVO</font> : <img src="https://i.pinimg.com/736x/91/56/c1/9156c17755c3a0a7ca71ee1c5c097606.jpg" width="40" height="">
+## ⊹ ࣪ ˖ MODULO <font color="">IMPERATIVO</font> : <img src="https://i.pinimg.com/1200x/b5/e6/91/b5e691b2ffeaa7c31a22e94053af5029.jpg" width="40" height="">
 
 #### temas ***importantes*** vistos: 
 * Ordenación
@@ -40,3 +40,4 @@
 
 
 
+<img src="https://i.pinimg.com/736x/9b/97/8b/9b978b5094ec1ebaa7abc08a481d4541.jpg" width="" height="">
