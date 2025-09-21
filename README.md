@@ -34,7 +34,30 @@
 
 <a href="https://www.youtube.com/watch?v=0dXSmfKcrhI&list=PL5dqmXOcJSUpBrwCN1A-kkkyGqANquoGC" target="_blank">.ᐟ Teorias/Practicas (Videos)</a>
 
+---
+## ⊹ ࣪ ˖ MODULO <font color="">OBJETOS</font> : <img src="https://i.pinimg.com/1200x/d8/69/79/d869796c4e22e634ecb251ec88bf5b2b.jpg" width="40" height="">
 
+#### temas ***importantes*** vistos: 
+*
+
+
+
+<a href="" target="_blank">.ᐟ Algoritmos utiles</a>
+
+<a href="https://drive.google.com/drive/folders/1inNAChdcVwViZBDoSSjQf5vAxA1Cu9xI">.ᐟ Practicas (PDFS) 
+
+<a href="" target="_blank">.ᐟ Practicas (Resoluciones)</a>
+
+<a href="https://drive.google.com/drive/folders/130eKK7YnpKqM_EFxeVC_4N5EFge-wR73">.ᐟ Parciales (PDFS)</a> 
+
+<a href="" target="_blank">.ᐟ Parciales (Resoluciones)</a> 
+
+<a href="https://drive.google.com/drive/folders/1IeaMepFtZ5NISUSv-vOwCXpbcOc-ZBLm">.ᐟ Teorias (PDFS)</a> 
+
+<a href="https://www.youtube.com/watch?v=0ix-_zDUiAA&list=PL5dqmXOcJSUopX_vB_Rqyhe6HjMKlmaOa" target="_blank">.ᐟ Teorias/Practicas (Videos)</a>
+
+
+---
 ## Parcial de Taller (ya sea cualquier modulo be like) :
 [![owo](https://img.youtube.com/vi/Jb9Ebe_rA8M/0.jpg)](https://www.youtube.com/watch?v=Jb9Ebe_rA8M)
 
