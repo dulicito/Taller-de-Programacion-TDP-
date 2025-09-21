@@ -1,4 +1,4 @@
-# Taller de Programacion-TDP  <img src="https://i.pinimg.com/736x/fa/16/24/fa162407c130d3498444f7afc529b5f6.jpg" width="40" height="40">
+# Taller de Programacion-TDP  <img src="https://i.pinimg.com/736x/67/4b/15/674b152fdeeaefb28f7b47210c029566.jpg" width="40" height="40">
 
 <img src="https://i.pinimg.com/originals/b7/fe/09/b7fe0977bad1950393d6450f32a37ca0.gif" width="650" height="100">
 
@@ -9,7 +9,7 @@
 <a href="https://drive.google.com/drive/folders/1Zima9quYKk92Z_nyHdGYrtXfBaZAGnwu" target="_blank">ᝰ.ᐟ Drive (Material Cursada Completa)</a>
 
 
-### MODULO IMPERATIVO : <img src="https://i.pinimg.com/736x/96/4e/a8/964ea8fd663443907e53b5262001180c.jpg" width="80" height="">
+### MODULO IMPERATIVO : <img src="https://i.pinimg.com/736x/91/56/c1/9156c17755c3a0a7ca71ee1c5c097606.jpg" width="80" height="">
 
 #### temas importantes vistos: 
 * Ordenacion
@@ -17,9 +17,7 @@
 * Arboles
 
 
->**𐔌՞. .՞𐦯 ANOTACION**: 
->>Autoguardado de un programa en Geany(Modulo Imperativo): 
->>>Herramientas > administrador de complementos > acciones de guardado > preferencias y ahí elegis el intervalo.
+>**𐔌՞. .՞𐦯 ANOTACION**: Autoguardado de un programa en Geany(Modulo Imperativo): Herramientas > administrador de complementos > acciones de guardado > preferencias y ahí elegis el intervalo.
 
 
 <a href="https://github.com/dulicito/Taller-de-Programacion-TDP-/tree/main/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Algoritmos/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Modulo%20Imperativo" target="_blank">Algoritmos utiles</a>
