@@ -9,7 +9,7 @@
 <a href="https://drive.google.com/drive/folders/1Zima9quYKk92Z_nyHdGYrtXfBaZAGnwu" target="_blank">ᝰ.ᐟ Drive (Material Cursada Completa)</a>
 
 
-# MODULO <font color="">IMPERATIVO</font> : <img src="https://i.pinimg.com/736x/91/56/c1/9156c17755c3a0a7ca71ee1c5c097606.jpg" width="40" height="">
+## MODULO <font color="">IMPERATIVO</font> : <img src="https://i.pinimg.com/736x/91/56/c1/9156c17755c3a0a7ca71ee1c5c097606.jpg" width="40" height="">
 
 #### temas ***importantes*** vistos: 
 * Ordenacion
