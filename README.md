@@ -20,7 +20,7 @@
 >**𐔌՞. .՞𐦯**<font color="red"> ANOTACION</font>: Autoguardado de un programa en Geany(Modulo Imperativo): Herramientas > administrador de complementos > acciones de guardado > preferencias y ahí elegis el intervalo.
 
 
-<a href="https://github.com/dulicito/Taller-de-Programacion-TDP-/tree/main/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Algoritmos/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Modulo%20Imperativo" target="_blank">.ᐟ Algoritmos utiles</a>
+<a href="https://github.com/dulicito/Taller-de-Programacion-TDP-/tree/main/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Modulo%20Imperativo%20/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Algoritmos" target="_blank">.ᐟ Algoritmos utiles</a>
 
 <a href="https://drive.google.com/drive/folders/19dW_WunhpnnZtwKNRxm63wZa_KW-OkKF" target="_blank">.ᐟ Practicas (PDFS) 
 
@@ -28,7 +28,7 @@
 
 <a href="https://drive.google.com/drive/folders/1Mvh_OE30JeMtmmPuxIxFfnDu2EzgWEUz" target="_blank">.ᐟ Parciales (PDFS)</a> 
 
-<a href="https://github.com/dulicito/Taller-de-Programacion-TDP-/tree/main/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Parciales/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Imperativo" target="_blank">.ᐟ Parciales (Resoluciones)</a> 
+<a href="https://github.com/dulicito/Taller-de-Programacion-TDP-/tree/main/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Modulo%20Imperativo%20/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Parciales" target="_blank">.ᐟ Parciales (Resoluciones)</a> 
 
 <a href="https://drive.google.com/drive/folders/1zh5JAgjEodbynRxS5s5YDH4NncYZUJXf" target="_blank">.ᐟ Teorias (PDFS)</a> 
 
