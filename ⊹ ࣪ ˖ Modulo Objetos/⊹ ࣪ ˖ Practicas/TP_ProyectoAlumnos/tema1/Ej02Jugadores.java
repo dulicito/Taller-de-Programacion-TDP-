@@ -41,8 +41,15 @@ public class Ej02Jugadores {
         /* me imprime muchos decimales, preguntar si hay posibilidad de imprimir
         el valor con dos decimales, como en pascal cuando aplicamos prom:0:2 */
         
+        
         double prom = suma / DF; 
-        System.out.println("El promedio de las alturas es: " + prom );
+        
+        /* el ayudante dijo que para acotar los decimales de un numero real, 
+        es posible aplicar string formatted, pero por las dudas no lo aplico 
+        en los parciales a esto xd ,sin embargo queda bonito :D*/
+        
+        String formattedProm = String.format("%,.2f",prom);
+        System.out.println("El promedio de las alturas es: " + formattedProm);
 
         //Paso 8: Recorrer el vector calculando lo pedido (cant. alturas que están por encima) del promedio)
         for (i= 0; i< 15; i++){
