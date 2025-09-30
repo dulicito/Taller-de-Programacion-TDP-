@@ -45,7 +45,6 @@ public class Ej03Matrices {
         for ( f=0; f<5; f++)
            for (c=0; c<5; c++)
                /*preguntar cual forma de imprimir es la mas correcta*/
-               /* System.out.print(matriz[f][c] + "\t");*/
                System.out.println(" Fila: "+ (f+1) + ", Columna: "+ (c+1) +" tiene el valor: "+matriz[f][c]);
         
         
@@ -72,7 +71,7 @@ public class Ej03Matrices {
         
         System.out.println("Suma de cada columna: ");
         for (c=0; c< 5; c++){
-            System.out.println("Columna" + (c+1)+":"+sumaColumnas[c]); 
+            System.out.println("Columna " + (c+1)+": "+sumaColumnas[c]); 
         }
         
         //Paso 7. lea un valor entero e indique si se encuentra o no en la matriz. En caso 
@@ -81,18 +80,47 @@ public class Ej03Matrices {
         
         System.out.println("Ingrese un numero a buscar: ");
         int num= Lector.leerInt();
-        boolean encontrado = false;
+        boolean encontrado;
         
-        for (f=0; f<5 && !encontrado; f++){
-            for (c=0; c<5 && !encontrado; c++){
-                if (matriz[f][c] == num){
-                    encontrado = true; 
+        /*previamente use un for pero agregar el (f<5 && !encontrado) como
+        condicional de un for esta mal, se debia hacer un while */
+        
+        /* PSEUDOCODIGO: 
+        utilizo dos while 
+        condicion: boolean <>true, fila o columna menor que su df  
+         
+        si en la pos actual es igual a num
+            imprimo fila y columna 
+            boolean se vuelve verdadero 
+        
+        paso a la siguiente pos de la matriz 
+        termina el while :D
+        
+        si boolean = falso
+            imprimo que no se encontro */
+        
+        /*algo falla, corregir despues ;-;, pero este seria maso la 
+        logica :p*/
+        
+        //nota final: correguido B)
+        
+        encontrado = false;
+        f = 0;
+        while ( f < 5 && !encontrado) {
+            c = 0;
+            while(c < 5 && !encontrado){
+                if( matriz[f][c] == num ){
+                    System.out.println("Se encontro en la fila: "+ (f+1));
+                    System.out.println("Se encontro en la columna: "+(c+1));
+                    encontrado = true;
                 }
+                c++;
             }
+            f++;
         }
-        if (encontrado)
-           System.out.println("Se encontro! ");
-           else System.out.println("No se encontro :C ");
+        if (!encontrado){
+            System.out.println("No se encontro el elemento.");
+        }
        
         
     }
