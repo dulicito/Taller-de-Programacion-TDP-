@@ -23,31 +23,49 @@ columnas: aspectos
 
 */
 
-import PaqueteLectura.GeneradorAleatorio;
+import PaqueteLectura.Lector;
 
 public class Ej05Restaurante {
 
 
     public static void main(String[] args) {
 
-        //DECLARO MATRIZ y INICIALIZO ALEATORIOS 
+        //DECLARO MATRIZ 
         
         int DFclientes = 5;
         int DFaspectos = 4;
         
         int[][]calificaciones = new int[DFclientes][DFaspectos];
         
-        GeneradorAleatorio.iniciar();
         
-        //CARGO CALIFICACIONES CON NUMEROS ALEATORIOS 
+        //INICIALIZO MATRIZ MANUALMENTE 
+        for (int f = 0; f < DFclientes; f++) {
+            for (int c = 0; c < DFaspectos; c++) {
+                calificaciones[f][c] = 0;
+            }
+        }
         
+        
+        //CARGO CALIFICACIONES
+        //CON EL DO WHILE FUERZO AL USUARIO PARA QUE INGRESE UN NUMERO POR TECLADO DENTRO DEL RANGO PREESTABLECIDO >:V
         int cliente, aspecto; 
         
-        for (cliente=0; cliente < DFclientes; cliente++ )
-            for (aspecto= 0; aspecto <DFaspectos; aspecto++){
-                calificaciones[cliente][aspecto] = 1 + GeneradorAleatorio.generarInt(11);
+        for (cliente  = 0; cliente < DFclientes; cliente++){
+            System.out.println("Ingrese una calificacion para el cliente nro "+ (cliente + 1));
+            for (aspecto = 0; aspecto < DFaspectos; aspecto++){
+                int note;
+                do {
+                    System.out.print("Calificación del aspecto nro " + (aspecto + 1) + " (1 a 10): ");
+                    note = Lector.leerInt();
+                    if (note < 1 || note > 10) {
+                        System.out.println("Valor incorrecto, ingrese un número entre 1 y 10.");
+                    }
+                } while (note < 1 || note > 10);
+
+                calificaciones[cliente][aspecto] = note;
             }
-        
+        }
+
         
         //CALCULAR Y MOSTRAR PROMEDIO POR ASPECTO 
         
@@ -59,7 +77,7 @@ public class Ej05Restaurante {
                 suma+= calificaciones[cliente][aspecto];
             }
             
-            double prom = suma / DFclientes;
+            double prom = (double)suma / DFclientes;
             System.out.println("Promedio del aspecto nro: " + (aspecto + 1)+" : "+ prom);
             System.out.println("------------");
         }
