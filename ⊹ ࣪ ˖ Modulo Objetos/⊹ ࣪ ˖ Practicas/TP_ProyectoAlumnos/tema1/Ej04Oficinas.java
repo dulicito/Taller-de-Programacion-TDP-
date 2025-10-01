@@ -18,30 +18,39 @@ manera: a cada persona se le pide el nro. de piso y nro. de oficina a
 la cual quiere concurrir. La llegada de personas finaliza al indicar un 
 nro.de piso 9. Al finalizar la llegada de personas, informe lo pedido. */
 
-/*para hacerlo mas tranqui usare el generar numeros randoms */
 
-import PaqueteLectura.GeneradorAleatorio;
+import PaqueteLectura.Lector;
+
 public class Ej04Oficinas {
     public static void main(String[] args) {
     
         // Inicializamos la estructura a usar 
         int[][]personas =new int[8][4];
         int piso,oficina;
+                
+        // inicializo manualmente la matriz, because lo dice la catedra 
+        for (int f = 0; f < 8; f++){
+            for (int c = 0; c< 4; c++){
+                personas[f][c]= 0;
+            }
+        }
         
-        GeneradorAleatorio.iniciar();
-        
-        //simulamos llegadas de personas 
-        /*DEBO INICIAR CADA POSICION EN 0? */
-        
-        piso = GeneradorAleatorio.generarInt(10);
+        //simulacion de llegada de personas
+        System.out.println(("Ingrese el numero de piso (1 a 8) al que desea ingresar"));
+        piso = Lector.leerInt();
         
         while (piso != 9){
-            piso = 1 + GeneradorAleatorio.generarInt(9);
+            System.out.println("Ingrese el numero de oficina(1 a 4):");
+            oficina = Lector.leerInt();
             
-            if (piso >=1 && piso <= 8){
-                oficina = 1 + GeneradorAleatorio.generarInt(4);
-                personas[piso - 1][oficina - 1]++;
-            }
+            if (piso >=1 && piso <=8){
+                if (oficina >= 1 && oficina <= 4){
+                    personas[piso-1][oficina-1]++;
+                }
+            } else {System.out.println("Datos ingresados fuera del rango, Intentelo de nuevo.");}
+       
+            System.out.println("Ingrese el numero de piso (1 a 8) al que desea ingresar");
+            piso = Lector.leerInt();
         }
         
         //imprimimos 
