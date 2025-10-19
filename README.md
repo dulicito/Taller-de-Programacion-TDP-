@@ -38,10 +38,10 @@
 ## ⊹ ࣪ ˖ MODULO <font color="">OBJETOS</font> : <img src="https://i.pinimg.com/1200x/d8/69/79/d869796c4e22e634ecb251ec88bf5b2b.jpg" width="40" height="">
 
 #### temas ***importantes*** vistos: 
-*Matrices
-*Clases/Clases abstractas/Clase madre-hijos
-*Herencia
-*Polimorfismo
+* Matrices
+* Clases/Clases abstractas/Clase madre-hijos
+* Herencia
+* Polimorfismo
 
 
 
