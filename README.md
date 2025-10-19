@@ -46,11 +46,11 @@
 
 <a href="https://drive.google.com/drive/folders/1inNAChdcVwViZBDoSSjQf5vAxA1Cu9xI">.ᐟ Practicas (PDFS) 
 
-<a href="" target="_blank">.ᐟ Practicas (Resoluciones)</a>
+<a href="https://github.com/dulicito/Taller-de-Programacion-TDP-/tree/main/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Modulo%20Objetos/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Practicas/TP_ProyectoAlumnos" target="_blank">.ᐟ Practicas (Resoluciones)</a>
 
 <a href="https://drive.google.com/drive/folders/130eKK7YnpKqM_EFxeVC_4N5EFge-wR73">.ᐟ Parciales (PDFS)</a> 
 
-<a href="" target="_blank">.ᐟ Parciales (Resoluciones)</a> 
+<a href="https://github.com/dulicito/Taller-de-Programacion-TDP-/tree/main/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Modulo%20Objetos/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Parciales" target="_blank">.ᐟ Parciales (Resoluciones)</a> 
 
 <a href="https://drive.google.com/drive/folders/1IeaMepFtZ5NISUSv-vOwCXpbcOc-ZBLm">.ᐟ Teorias (PDFS)</a> 
 
