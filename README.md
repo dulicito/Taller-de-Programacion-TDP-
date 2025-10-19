@@ -45,7 +45,7 @@
 
 
 
-<a href="" target="_blank">.ᐟ Algoritmos utiles</a>
+<a href="https://github.com/dulicito/Taller-de-Programacion-TDP-/tree/main/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Modulo%20Objetos/%E2%8A%B9%20%E0%A3%AA%20%CB%96%20Algoritmos" target="_blank">.ᐟ Algoritmos utiles</a>
 
 <a href="https://drive.google.com/drive/folders/1inNAChdcVwViZBDoSSjQf5vAxA1Cu9xI">.ᐟ Practicas (PDFS) 
 
