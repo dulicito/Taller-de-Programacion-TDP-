@@ -48,7 +48,7 @@ type
   vectorMejores = array[rango_genero] of mejorPelicula;
 
 {------------------------------------------------------------------}
-procedure agregarAlFinal(var l: lista; p: pelicula); //PREGUNTAR por este INCISO 
+procedure agregarAlFinal(var l: lista; p: pelicula); 
 var
   nue, aux: lista;
 begin
@@ -137,9 +137,7 @@ begin
 end;
 
 {------------------------------------------------------------------}
-{Anotacion: preguntar en clases, tengo entendido que 
-este algoritmo es el mas eficiente pero igualmente no 
-pierdo nada preguntando(? )}
+
 procedure insercion(var v: vectorMejores); // INCISO C 
 var
   i, j: integer;
