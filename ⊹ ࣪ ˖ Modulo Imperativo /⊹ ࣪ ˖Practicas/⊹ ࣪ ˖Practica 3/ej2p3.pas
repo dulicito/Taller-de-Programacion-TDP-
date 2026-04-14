@@ -1,163 +1,260 @@
 {2. Escribir un programa que:
-a. Implemente un módulo que genere aleatoriamente información de ventas de un comercio.
-Para cada venta generar código de producto, fecha y cantidad de unidades vendidas. Finalizar
-con el código de producto 0. Un producto puede estar en más de una venta. Se pide:
-i. Generar y retornar un árbol binario de búsqueda de ventas ordenado por código de
-producto. Los códigos repetidos van a la derecha.
-ii. Generar y retornar otro árbol binario de búsqueda de productos vendidos ordenado por
-código de producto. Cada nodo del árbol debe contener el código de producto y la
-cantidad total de unidades vendidas.
-iii. Generar y retornar otro árbol binario de búsqueda de productos vendidos ordenado por
-código de producto. Cada nodo del árbol debe contener el código de producto y la lista de
-las ventas realizadas del producto.
+
+a. Implemente un módulo que genere aleatoriamente información de ventas 
+de un comercio.Para cada venta generar código de producto, fecha y cantidad 
+de unidades vendidas. Finalizar con el código de producto 0. Un producto puede 
+estar en más de una venta. Se pide:
+
+
+i. Generar y retornar un árbol binario de búsqueda de ventas ordenado por código 
+de producto. Los códigos repetidos van a la derecha.
+
+
+ii. Generar y retornar otro árbol binario de búsqueda de productos vendidos 
+ordenado por código de producto. Cada nodo del árbol debe contener el código de 
+producto y la cantidad total de unidades vendidas.
+
+
+iii. Generar y retornar otro árbol binario de búsqueda de productos vendidos ordenado 
+por código de producto. Cada nodo del árbol debe contener el código de producto y la 
+lista de las ventas realizadas del producto.
 Nota: El módulo debe retornar TRES árboles.
-b. Implemente un módulo que reciba el árbol generado en i. y una fecha y retorne la cantidad
-total de productos vendidos en la fecha recibida.
-c. Implemente un módulo que reciba el árbol generado en ii. y retorne el código de producto
-con mayor cantidad total de unidades vendidas.
-c. Implemente un módulo que reciba el árbol generado en iii. y retorne el código de producto
+
+
+b. Implemente un módulo que reciba el árbol generado en i. y una fecha y retorne 
+la cantidad total de productos vendidos en la fecha recibida.
+
+
+c. Implemente un módulo que reciba el árbol generado en ii. y retorne el código de 
+producto con mayor cantidad total de unidades vendidas.
+
+
+d. Implemente un módulo que reciba el árbol generado en iii. y retorne el código de producto
 con mayor cantidad de ventas}
 
-wtfff con este ej. dsp lo hago :c
+program ej2p3;
 
-
-{codigo de adrian}
-{
-    2. Escribir un programa que: 
-    
-    a.  Implemente un módulo que genere aleatoriamente información de ventas de un comercio. 
-        Para cada venta generar código de producto, fecha y cantidad de unidades vendidas. Finalizar 
-        con el código de producto 0. Un producto puede estar en más de una venta. Se pide: 
-    
-        i. Generar y retornar un árbol binario de búsqueda de ventas ordenado por código de 
-        producto. Los códigos repetidos van a la derecha. 
-            
-        ii. Generar y retornar otro árbol binario de búsqueda de productos vendidos ordenado por 
-        código de producto. Cada nodo del árbol debe contener el código de producto y la 
-        cantidad total de unidades vendidas. 
-    
-        iii. Generar y retornar otro árbol binario de búsqueda de productos vendidos ordenado por 
-        código de producto. Cada nodo del árbol debe contener el código de producto y la lista de 
-        las ventas realizadas del producto. 
-    
-        Nota: El módulo debe retornar TRES árboles. 
-    
-            b. Implemente un módulo que reciba el árbol generado en i. y una fecha y retorne la cantidad 
-            total de productos vendidos en la fecha recibida. 
-            
-            c. Implemente un módulo que reciba el árbol generado en ii. y retorne el código de producto 
-            con mayor cantidad total de unidades vendidas. 
-            
-            d. Implemente un módulo que reciba el árbol generado en iii. y retorne el código de producto 
-            con mayor cantidad de ventas. 
-}
-
-
-program Clase3Actividad2;
 type
-	
-	{
-		i. Generar y retornar un árbol binario de búsqueda de ventas ordenado por código de 
-        producto. Los códigos repetidos van a la derecha. 
-	}
-	
-    RangoDia = 1..31;
-    RangoMes = 1..12;
-    
-    
-    calendario = record
-        dia:RangoDia;
-        mes:RangoMes;
+  venta = record
+    cod: integer;
+    fecha: integer;
+    cant: integer;
+  end;
+
+  // LISTA 
+  lista = ^nodoLista;
+  nodoLista = record
+    dato: venta;
+    sig: lista;
+  end;
+
+  // ARBOL i 
+  arbol1 = ^nodo1;
+  nodo1 = record
+    dato: venta;
+    HI, HD: arbol1;
+  end;
+
+  // ARBOL ii 
+  info2 = record
+    cod: integer;
+    total: integer;
+  end;
+
+  arbol2 = ^nodo2;
+  nodo2 = record
+    dato: info2;
+    HI, HD: arbol2;
+  end;
+
+  //  ARBOL iii 
+  info3 = record
+    cod: integer;
+    ventas: lista;
+  end;
+
+  arbol3 = ^nodo3;
+  nodo3 = record
+    dato: info3;
+    HI, HD: arbol3;
+  end;
+
+// generador de ventas
+
+procedure CargarVenta(var v: venta);
+begin
+  v.cod := random(10); //  corta en 0
+  if (v.cod <> 0) then begin
+    v.fecha := random(30) + 1;
+    v.cant := random(20) + 1;
+  end;
+end;
+
+
+
+// arbol i.
+
+procedure Insertar1(var a: arbol1; v: venta);
+begin
+  if (a = nil) then begin
+    new(a);
+    a^.dato := v;
+    a^.HI := nil;
+    a^.HD := nil;
+  end
+  else if (v.cod < a^.dato.cod) then
+    Insertar1(a^.HI, v)
+  else
+    Insertar1(a^.HD, v);
+end;
+
+
+// arbol ii.
+procedure Insertar2(var a: arbol2; v: venta);
+begin
+  if (a = nil) then begin
+    new(a);
+    a^.dato.cod := v.cod;
+    a^.dato.total := v.cant;
+    a^.HI := nil;
+    a^.HD := nil;
+  end
+  else if (v.cod = a^.dato.cod) then
+    a^.dato.total := a^.dato.total + v.cant
+  else if (v.cod < a^.dato.cod) then
+    Insertar2(a^.HI, v)
+  else
+    Insertar2(a^.HD, v);
+end;
+
+
+
+// arbol iii.
+procedure AgregarLista(var l: lista; v: venta);
+var nue: lista;
+begin
+  new(nue);
+  nue^.dato := v;
+  nue^.sig := l;
+  l := nue;
+end;
+
+procedure Insertar3(var a: arbol3; v: venta);
+begin
+  if (a = nil) then begin
+    new(a);
+    a^.dato.cod := v.cod;
+    a^.dato.ventas := nil;
+    AgregarLista(a^.dato.ventas, v);
+    a^.HI := nil;
+    a^.HD := nil;
+  end
+  else if (v.cod = a^.dato.cod) then
+    AgregarLista(a^.dato.ventas, v)
+  else if (v.cod < a^.dato.cod) then
+    Insertar3(a^.HI, v)
+  else
+    Insertar3(a^.HD, v);
+end;
+
+
+// inciso A 
+
+
+procedure Generar(var a1: arbol1; var a2: arbol2; var a3: arbol3);
+var v: venta;
+begin
+  a1 := nil; a2 := nil; a3 := nil;
+
+  CargarVenta(v);
+  while (v.cod <> 0) do begin
+    Insertar1(a1, v);
+    Insertar2(a2, v);
+    Insertar3(a3, v);
+    CargarVenta(v);
+  end;
+end;
+
+
+
+// inciso b 
+function TotalFecha(a: arbol1; f: integer): integer;
+begin
+  if (a = nil) then
+    TotalFecha := 0
+  else begin
+    TotalFecha := TotalFecha(a^.HI, f) + TotalFecha(a^.HD, f);
+    if (a^.dato.fecha = f) then
+      TotalFecha := TotalFecha + a^.dato.cant;
+  end;
+end;
+
+
+
+// inciso c 
+procedure MaxUnidades(a: arbol2; var maxCod, maxCant: integer);
+begin
+  if (a <> nil) then begin
+    if (a^.dato.total > maxCant) then begin
+      maxCant := a^.dato.total;
+      maxCod := a^.dato.cod;
     end;
-    
-    
-    venta = record
-        codprod:integer;// Codigo de producto.
-        fecha:calendario;
-        unidades:integer;// Cantidad de unidades vendidas.
+    MaxUnidades(a^.HI, maxCod, maxCant);
+    MaxUnidades(a^.HD, maxCod, maxCant);
+  end;
+end;
+
+
+
+// inciso d 
+function ContarLista(l: lista): integer;
+begin
+  if (l = nil) then
+    ContarLista := 0
+  else
+    ContarLista := 1 + ContarLista(l^.sig);
+end;
+
+procedure MaxVentas(a: arbol3; var maxCod, maxV: integer);
+var cant: integer;
+begin
+  if (a <> nil) then begin
+    cant := ContarLista(a^.dato.ventas);
+    if (cant > maxV) then begin
+      maxV := cant;
+      maxCod := a^.dato.cod;
     end;
-	
-	
-    arbol = ^nodo;
-    nodo = record
-        dato:venta;
-        Hd:arbol;
-        Hi:arbol;
-    end;
-    
-    {
-		ii. Generar y retornar otro árbol binario de búsqueda de productos vendidos ordenado por 
-        código de producto. Cada nodo del árbol debe contener el código de producto y la 
-        cantidad total de unidades vendidas. 
-	}
-    
-    productos = record
-		codprod:integer;
-		Totalcant:integer;
-	end;
-	arbol2 = ^nodo2;
-	nodo2 = record
-		dato:productos;
-		HD:arbol2;
-		Hi:arbol2;
-	end;
-	{
-	        iii. Generar y retornar otro árbol binario de búsqueda de productos vendidos ordenado por 
-        código de producto. Cada nodo del árbol debe contener el código de producto y la lista de 
-        las ventas realizadas del producto.  
-	}
-	vendidos = record
-		unidades:integer;
-		fecha:calendario;
-	end;
-	prodvend = record
-		codprod:integr;
-		L:Lista;
-		
-	end;
-	
-	Lista = ^nodo3A;
-	nodo3A = record
-		dato:vendidos;
-		sig:Lista;
-	end;
-	
-	arbol3 = ^nodo3
-	nodo3 = record
-		dato:prodvent;
-		Hd:arbol3;
-		Hi:arbol3;
-	end;
-	
-	
-	
-{
-    a.  Implemente un módulo que genere aleatoriamente información de ventas de un comercio. 
-        Para cada venta generar código de producto, fecha y cantidad de unidades vendidas. Finalizar 
-        con el código de producto 0. Un producto puede estar en más de una venta. Se pide:
-}
+    MaxVentas(a^.HI, maxCod, maxV);
+    MaxVentas(a^.HD, maxCod, maxV);
+  end;
+end;
 
 
 
-
-
-{
-     i. Generar y retornar un árbol binario de búsqueda de ventas ordenado por código de 
-        producto. Los códigos repetidos van a la derecha.
-}
-
-
-
-
-{
-    ii. Generar y retornar otro árbol binario de búsqueda de productos vendidos ordenado por 
-        código de producto. Cada nodo del árbol debe contener el código de producto y la 
-        cantidad total de unidades vendidas. 
-}
-
+//prog. principal.
 
 var
-	
+  a1: arbol1;
+  a2: arbol2;
+  a3: arbol3;
+  fecha: integer;
+  maxCod, maxCant: integer;
+  maxCodV, maxV: integer;
+
 begin
-	
+  randomize;
+
+  Generar(a1, a2, a3); // inciso a 
+
+  writeln('Ingrese fecha a consultar: ');
+  readln(fecha);
+  writeln('Total vendido en esa fecha: ', TotalFecha(a1, fecha)); // inciso b
+
+  maxCant := -9999;
+  MaxUnidades(a2, maxCod, maxCant);
+  writeln('Producto con mas unidades vendidas: ', maxCod); // inciso c 
+
+  maxV := -9999;
+  MaxVentas(a3, maxCodV, maxV);
+  writeln('Producto con mas ventas: ', maxCodV); // inciso d 
 end.
