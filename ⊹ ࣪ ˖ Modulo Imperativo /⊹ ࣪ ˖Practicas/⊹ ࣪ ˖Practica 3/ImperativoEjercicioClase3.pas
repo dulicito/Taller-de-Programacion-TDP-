@@ -41,7 +41,7 @@ type rangoEdad = 12..100;
                     HD: arbol;
                  end;
      
-procedure GenerarArbol (var a: arbol);
+procedure GenerarArbol (var a: arbol); // inciso A 
 
 { Implementar un modulo que almacene informacion de socios de un club en un arbol binario de busqueda. 
 De cada socio se debe almacenar numero de socio, nombre y edad. La carga finaliza con el numero de 
@@ -92,7 +92,8 @@ Begin
  writeln;
 end;
 
-procedure InformarSociosOrdenCreciente (a: arbol);
+
+procedure InformarSociosOrdenCreciente (a: arbol); // inciso b i.
 { Informar los datos de los socios en orden creciente. }
   
   procedure InformarDatosSociosOrdenCreciente (a: arbol);
@@ -115,7 +116,29 @@ Begin
 end;
 
 
-procedure InformarNumeroSocioConMasEdad (a: arbol);
+
+procedure InformarSociosOrdenDecreciente (a: arbol); // inciso b ii.
+
+  procedure Recorrer (a: arbol);
+  begin
+    if (a <> nil) then begin
+      Recorrer(a^.HD);
+      writeln('Numero: ', a^.dato.numero, ' Nombre: ', a^.dato.nombre, ' Edad: ', a^.dato.edad);
+      Recorrer(a^.HI);
+    end;
+  end;
+
+begin
+  writeln;
+  writeln('----- Socios en orden decreciente ----->');
+  writeln;
+  Recorrer(a);
+  writeln;
+end;
+
+
+
+procedure InformarNumeroSocioConMasEdad (a: arbol); // inciso b iii.
 
 { Informar el numero de socio con mayor edad. Debe invocar a un modulo recursivo que retorne dicho valor.  }
 
@@ -156,7 +179,9 @@ begin
   writeln;
 end;
 
-procedure AumentarEdadNumeroImpar (a: arbol);
+
+
+procedure AumentarEdadNumeroImpar (a: arbol); // inciso b iv.
 
 {Aumentar en 1 la edad de los socios con edad impar e informar la cantidad de socios que se les aumento la edad.}
   
@@ -171,7 +196,6 @@ procedure AumentarEdadNumeroImpar (a: arbol);
             AumentarEdad:= resto + AumentarEdad (a^.HI) + AumentarEdad (a^.HD);
           end;  
   end;
-
 begin
   writeln;
   writeln ('----- Cantidad de socios con edad aumentada ----->');
@@ -184,19 +208,99 @@ begin
 end;
 
 
+
+procedure InformarExistenciaNombreSocio(a: arbol); // inciso b vi.
+
+  function ExisteNombre(a: arbol; nombre: string): boolean;
+  begin
+    if (a = nil) then
+      ExisteNombre := false
+    else if (a^.dato.nombre = nombre) then
+      ExisteNombre := true
+    else
+      ExisteNombre := ExisteNombre(a^.HI, nombre) OR
+                      ExisteNombre(a^.HD, nombre);
+  end;
+
+var nombreBuscado: string;
+begin
+  writeln('Ingrese nombre a buscar: ');
+  readln(nombreBuscado);
+
+  if (ExisteNombre(a, nombreBuscado)) then
+    writeln('El socio existe')
+  else
+    writeln('El socio NO existe');
+
+
+end;
+
+
+
+procedure InformarCantidadSocios(a: arbol); // inciso b vii.
+
+  function Cantidad(a: arbol): integer;
+  begin
+    if (a = nil) then
+      Cantidad := 0
+    else
+      Cantidad := 1 + Cantidad(a^.HI) + Cantidad(a^.HD);
+  end;
+
+begin
+  writeln;
+  writeln('Cantidad total de socios: ', Cantidad(a));
+  writeln;
+end;
     
+    
+
+procedure InformarPromedioDeEdad(a: arbol); //inciso b viii.
+
+  function Cantidad(a: arbol): integer;
+  begin
+    if (a = nil) then
+      Cantidad := 0
+    else
+      Cantidad := 1 + Cantidad(a^.HI) + Cantidad(a^.HD);
+  end;
+
+  function SumaEdades(a: arbol): integer;
+  begin
+    if (a = nil) then
+      SumaEdades := 0
+    else
+      SumaEdades := a^.dato.edad + SumaEdades(a^.HI) + SumaEdades(a^.HD);
+  end;
+
+var total, suma: integer;
+    promedio: real;
+
+begin
+  total := Cantidad(a);
+  suma := SumaEdades(a);
+
+  if (total <> 0) then
+    promedio := suma / total
+  else
+    promedio := 0;
+
+
+  writeln('Promedio de edad: ', promedio:0:2);
+end;
+
+	
 var a: arbol;
 
 Begin
   randomize;
-  GenerarArbol (a); // inciso A 
-  InformarSociosOrdenCreciente (a); // inciso b i.
-  InformarSociosOrdenDecreciente (a); // inciso b ii.
-  InformarNumeroSocioConMasEdad (a); //inciso b iii.
-  AumentarEdadNumeroImpar (a); // inciso b iv.
-  InformarSociosOrdenCreciente (a); //inciso 
-  InformarExistenciaNombreSocio (a); // inciso b vi.
-  InformarCantidadSocios (a); //inciso vii.
-  InformarPromedioDeEdad (a); //inciso viii.
+  GenerarArbol (a); // inciso A  LISTO.
+  InformarSociosOrdenCreciente (a); // inciso b i. LISTO 
+  InformarSociosOrdenDecreciente (a); // inciso b ii. LISTO 
+  InformarNumeroSocioConMasEdad (a); //inciso b iii. LISTO 
+  AumentarEdadNumeroImpar (a); // inciso b iv. LISTO 
+  InformarSociosOrdenCreciente (a); //inciso b i. LISTO 
+  InformarExistenciaNombreSocio (a); // inciso b vi. LISTO 
+  InformarCantidadSocios (a); //inciso vii. LISTO
+  InformarPromedioDeEdad (a); //inciso viii. LISTO
 End.
-
