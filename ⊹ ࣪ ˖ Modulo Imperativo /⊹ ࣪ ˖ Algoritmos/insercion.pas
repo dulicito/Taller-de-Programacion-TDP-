@@ -1,7 +1,6 @@
 Procedure insercion ( var v: vector; dimLog: indice );
 Var
- i, j: indice; actual: integer;	
-		
+ i, j: indice; actual: integer;			
 begin
  for i:= 2 to dimLog do begin 
      actual:= v[i];
