@@ -1,7 +1,5 @@
-Procedure seleccion ( var v: vector; dimLog: integer);
-
+procedure seleccion ( var v: vector; dimLog: integer);
 var i, j, pos: integar; item : integer;	
-		
 begin
  for i:=1 to (dimLog-1) do begin {busca el mínimo y guarda en pos la posición}
           pos := i;
