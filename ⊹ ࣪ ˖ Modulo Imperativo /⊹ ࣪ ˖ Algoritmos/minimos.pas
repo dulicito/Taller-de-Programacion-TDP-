@@ -1,17 +1,14 @@
 {DEVUELVE EL VALOR MINIMO}
 
 function minimo (a:arbol): integer; 
-
 begin
   if (a^.HI = nil) then 
      minimo:= a^.dato
-
   else mínimo:= mínimo (a^.HI);
 end;
 
 
 function minimo (a:arbol): integer; 
-
 begin
   while (a^.HI <> nil) do 
      a:= a^.HI;
@@ -22,8 +19,7 @@ end;
 {DEVUELVE EL NODO QUE CONTIENE EL MINIMO}
 
 function minimoNodo (a:arbol): arbol; 
-
-Begin
+begin
   if (a = nil) then minimoNodo:= nil
   else if (a^.HI = nil) then 
         minimoNodo:= a;
@@ -33,10 +29,10 @@ end;
 
 
 function minimoNodo (a:arbol): arbol; 
-Begin
+begin
   if (a = nil) then minimoNodo:= nil
   else 
    while (a^.HI <> nil) do 
      a:= a^.HI; 
    minimoNodo:= a
- end;
+end;
