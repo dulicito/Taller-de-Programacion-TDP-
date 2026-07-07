@@ -1,8 +1,7 @@
-{ Descargar el archivo ProgramaNumAleatorio.pas y realizar las
-siguientes actividades:
-ACTIVIDAD 1 ! =}
+{Descargar el archivo ProgramaNumAleatorio.pas y realizar las
+siguientes actividades: ACTIVIDAD 1 ! =}
 
-program NumAleatorio;
+program prac0ej1;
 var 
     ale: integer;
 begin
