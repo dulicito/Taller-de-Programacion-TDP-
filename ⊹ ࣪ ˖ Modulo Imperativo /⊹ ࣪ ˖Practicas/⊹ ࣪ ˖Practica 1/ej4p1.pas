@@ -1,19 +1,24 @@
-{4.- Una librería requiere el procesamiento de la información de sus productos. De cada
-producto se conoce el código del producto, código de rubro (del 1 al 6) y precio.
-Implementar un programa que invoque a módulos para cada uno de los siguientes puntos:
+{4.- Una librería requiere el procesamiento de la información de sus 
+productos. De cada producto se conoce el código del producto, código 
+de rubro (del 1 al 6) y precio.
 
-a. Lea los datos de los productos y los almacene ordenados por código de producto y
-agrupados por rubro, en una estructura de datos adecuada. El ingreso de los productos finaliza
-cuando se lee el precio -1.
+Implementar un programa que invoque a módulos para cada uno de los 
+siguientes puntos:
 
-b. Una vez almacenados, muestre los códigos de los productos pertenecientes a cada rubro.
+a. Lea los datos de los productos y los almacene ordenados por código 
+de producto y agrupados por rubro, en una estructura de datos adecuada. 
+El ingreso de los productos finaliza cuando se lee el precio -1.
 
-c. Genere un vector (de a lo sumo 20 elementos) con los productos del rubro 3. Considerar que
-puede er más o menos de 20 habproductos del rubro 3. Si la cantidad de productos del rubro 3
-es mayor a 20, almacenar los primeros 30 que están en la lista e ignore el resto.
+b. Una vez almacenados, muestre los códigos de los productos pertenecientes 
+a cada rubro.
 
-d. Ordene, por precio, los elementos del vector generado en c) utilizando alguno de los dos
-métodos vistos en la teoría
+c. Genere un vector (de a lo sumo 20 elementos) con los productos del 
+rubro 3. Considerar que puede haber más o menos de 20 productos del 
+rubro 3. Si la cantidad de productos del rubro 3 es mayor a 20, almacenar 
+los primeros 20 que están en la lista e ignore el resto. MODIFICADO 
+
+d. Ordene, por precio, los elementos del vector generado en c) utilizando 
+alguno de los dos métodos vistos en la teoría
 
 e. Muestre los precios del vector resultante del punto d).
 
@@ -42,9 +47,6 @@ type
     rubro3= array[1..20]of producto;
 
 {-----------------------------------------------------------------------------}
-{a. Lea los datos de los productos y los almacene ordenados por código de producto y
-agrupados por rubro, en una estructura de datos adecuada. El ingreso de los productos finaliza
-cuando se lee el precio -1.}
 
 procedure inicializar (var v:vector);
 var
@@ -71,7 +73,7 @@ begin
   nuevo^.info := p;
   nuevo^.sig := nil;
 
-  // Si la lista está vacía o el nuevo código es menor al primero
+  // Si la lista esta vacia o el nuevo codigo es menor al primero
   if (l = nil) or (p.codigo < l^.info.codigo) then
   begin
     nuevo^.sig := l;
@@ -82,7 +84,7 @@ begin
     anterior := l;
     actual := l^.sig;
 
-    // Recorremos mientras no lleguemos al final y el código sea mayor
+    // Recorremos mientras no lleguemos al final y el codigo sea mayor
     while (actual <> nil) and (p.codigo > actual^.info.codigo) do
     begin
       anterior := actual;
@@ -94,12 +96,17 @@ begin
   end;
 end;
 
-
+{INCISO A 
+* parametros: vector
+* objetivo: almacenar en un vector(agrupados por rubros) los productos, 
+            cada posicion del vector contiene una lista de productos ordenados 
+            por codigo de producto. 
+  corte de control= precio = -1 }
+  
 procedure cargarvector(var v:vector);
 var
     p:producto;
 begin
-    inicializar(v);
     leerProducto(p);
     while (p.precio <> -1)do begin 
         insertarOrdenado(v[p.codigo_rubro],p);
@@ -108,7 +115,6 @@ begin
 end;
 
 {------------------------------------------------------------------------------}
-{b. Una vez almacenados, muestre los códigos de los productos pertenecientes a cada rubro.}
 
 procedure imprimirlista (l:lista_productos);
 begin
@@ -122,6 +128,9 @@ begin
     end;
 end;
 
+{ INCISO B 
+* parametros: vector
+* objetivo: imprimir los productos de cada rubro }
 
 procedure imprimir (v:vector); // INCISO B 
 var
@@ -130,15 +139,18 @@ begin
     for i:= 1 to maxrubro do begin 
         writeln('Datos del rubro: ',i);
         imprimirlista(v[i]);
-        writeln();
+        writeln('--------------------------------------------------');
     end;
 end;
 
 {-------------------------------------------------------------------------------}
-{c. Genere un vector (de a lo sumo 20 elementos) con los productos del rubro 3. 
-Considerar que puede haber más o menos de 20 productos del rubro 3. Si la cantidad 
-de productos del rubro 3 es mayor a 20, almacenar los primeros 30 que están en la 
-lista e ignore el resto.}
+{ INCISO C: 
+* parametros: vector original, nuevo vector de rubro 3 y su diml 
+* objetivo: cargar un vector(a lo sumo 20 elementos) con los productos
+ 			del rubro 3
+ 
+  si cant productos > 20, almacenamos los primeros 20.
+* }
 
 procedure cargarRubro3(v: vector; var v3: rubro3; var diml: integer);
 var
@@ -146,7 +158,6 @@ var
   aux: lista_productos;
 begin
   i := 0;
-  diml := 0;
   aux := v[3]; // Usamos puntero auxiliar para no modificar la lista original
 
   while (aux <> nil) and (i < 20) do begin
@@ -159,8 +170,9 @@ begin
 end;
 
 {------------------------------------------------------------------------------}
-{d. Ordene, por precio, los elementos del vector generado en c) utilizando alguno de los dos
-métodos vistos en la teoría}
+{INCISO D:
+* parametros: vector del rubro 3, su diml
+* objetivo: ordenar por precio los elementos del vector}
 
 procedure selecion (var v : rubro3; diml : integer); // INCISO D 
 var
@@ -181,10 +193,9 @@ end;
 
 
 {-----------------------------------------------------------------------------}
-{e. Muestre los precios del vector resultante del punto d).}
-{nota: se utiliza otro procedimiento, si el vectorrubro3 tuviera la misma cantidad de DF
-que el vector original podria reutilizar el imprimir del inciso B, pero en este caso
-no aplica por tener diferente DF/DL}
+{INCISO E:
+* parametros: vector del rubro 3, su diml
+* objetivo: imprimir en pantalla su contenido  }
 
 procedure imprimir2 (v:rubro3;diml:integer); // INCISO E 
 var
@@ -200,7 +211,9 @@ begin
 end;
 
 {-----------------------------------------------------------------------------}
-{f. Calcule el promedio de los precios del vector resultante del punto d).}
+{INCISO F: 
+* parametros: vector rubro 3, su diml
+* objetivo: calcular promedio de precios del vector }
 
 
 function prom (v:rubro3; diml:integer):real;
@@ -220,6 +233,8 @@ var
     v:vector; v3:rubro3; diml:integer;
 begin
     randomize;
+    diml:= 0; 
+    inicializar(v);
     cargarvector(v); //INCISO A 
     imprimir(v); // INCISO B 
     cargarrubro3(v,v3,diml); //INCISO C 
