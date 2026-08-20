@@ -1,14 +1,16 @@
 {c) Modifique el programa para que imprima 20 números
 aleatorios.
+
 d) Modifique el programa para que imprima N números
 aleatorios en el rango (A,B), donde N, A y B son
 números enteros que se leen por teclado.
+
 e) Modifique el programa para que imprima números
 aleatorios en el rango (A,B) hasta que se genere un
 valor igual a F, el cual no debe imprimirse. F, A y B
 son números enteros que se leen por teclado.}
 
-Program prac0ej1c;
+Program prac0ej1c; //inciso c 
 Var 
     ale,i: integer;
 Begin
@@ -23,7 +25,7 @@ End.
 
 
 
-Program prac0ej1d;
+Program prac0ej1d; //inciso d
 Var 
     ale: integer;
     n,a,b,i: integer;
@@ -41,7 +43,7 @@ Begin
 End.
 
 
-Program prac0ej1e;
+Program prac0ej1e; //inciso e 
 Var 
     ale, a,b,f: integer;
 Begin
