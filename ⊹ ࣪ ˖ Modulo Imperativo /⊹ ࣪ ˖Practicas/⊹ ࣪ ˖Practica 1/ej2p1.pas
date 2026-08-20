@@ -1,15 +1,15 @@
-{   2.- El administrador de un edificio de oficinas cuenta, en papel, con la información del pago de
-    las expensas de dichas oficinas.
-    Implementar un programa que invoque a módulos para cada uno de los siguientes puntos:
+{   2.- El administrador de un edificio de oficinas cuenta, en papel, 
+    con la información del pago de las expensas de dichas oficinas.
+    Implementar un programa que invoque a módulos para cada uno de los 
+    siguientes puntos:
     
-    a. Genere un vector, sin orden, con a lo sumo las 300 oficinas que administra. De cada oficina
-    se ingresa el código de identificación, DNI del propietario y valor de la expensa. La lectura
-    finaliza cuando se ingresa el código de identificación -1, el cual no se procesa.
+    a. Genere un vector, sin orden, con a lo sumo las 300 oficinas que 
+    administra. De cada oficina se ingresa el código de identificación, 
+    DNI del propietario y valor de la expensa. La lectura finaliza 
+    cuando se ingresa el código de identificación -1, el cual no se procesa.
     
-    b. Ordene el vector, aplicando el método de inserción, por código de identificación de la
-    oficina.
-    
-    c. Ordene el vector aplicando el método de selección, por código de identificación de la oficina}
+    b. Ordene el vector aplicando el método de selección, por código de 
+    identificación de la oficina}
     
     program ej2p1;
     const
@@ -36,11 +36,20 @@
         end; 
     end;
     
-    procedure generarVector (var v:vector; var dl:integer); //INCISO A 
+    {INCISO A:
+    * parametros: vector, dl
+    * objetivo: cargar un vector(300 oficinas) SIN ORDEN
+                hasta que codigo identificacion = -1 o
+                hasta que se cargue todo el vector. 
+                
+                
+     principal duda: preguntar si esta bien aplicado guardar
+     los datos SIN ORDEN.}
+                
+    procedure generarVector (var v:vector; var dl:integer); 
     var 
         r:oficina; 
     begin
-        dl:= 0; 
         writeln('ingrese los datos de la oficina: ', dl+1);
         leeroficina(r);
         while (r.codigo <> corte) and (dl < maxofi)do begin
@@ -51,26 +60,13 @@
         end; 
     end;
         
-    procedure inserccion (var v:vector; dl:integer); //MODULO B 
-    var
-        i,j:integer;
-        actual:oficina; //actual es del tipo de datos que guarda el vector
-     begin
-        for i:= 2 to dl do begin
-            actual:=v[i];
-            j:=i-1;
-            while (j>0) and (v[j].codigo > actual.codigo)do begin
-                v[j+1]:=v[j];
-                j:=j-1;
-             end;
-             v[j+1]:=actual;
-        end;
-     end;
-
-    procedure seleccion (var v:vector; dl:integer); //MODULO C 
+	{INCISO B:
+	* ninguna duda. }
+	
+    procedure seleccion (var v:vector; dl:integer); //inciso b 
     Var
         i,j,pos:integer;
-        item:oficina; //item es del tipo de datos que guarda el vector
+        item:oficina; 
     begin
         for i:=1 to dl -1 do begin
             pos:=i;
@@ -88,7 +84,7 @@
     var
         v: vector; dl:integer;
     begin 
-        generarVector(v,dl);//modulo a 
-        inserccion(v,dl);//modulo b 
-        seleccion(v,dl);//modulo c 
+		dl:= 0; 
+        generarVector(v,dl);//inciso a 
+        seleccion(v,dl);//inciso b 
     end.
