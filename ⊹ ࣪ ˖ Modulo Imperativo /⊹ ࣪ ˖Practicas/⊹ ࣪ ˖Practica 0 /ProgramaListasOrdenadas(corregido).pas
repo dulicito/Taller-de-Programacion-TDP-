@@ -27,7 +27,7 @@ Type
     sig: Lista;
   End;
 
-  // Inserta el valor en la posición ordenada (menor a mayor)
+
 Procedure InsertarOrdenado(Var L: Lista; num: integer);
 Var 
   nue, ant, act: Lista;
@@ -56,38 +56,33 @@ End;
 
 
 
-// Carga la lista ordenada con valores aleatorios entre 100 y 150 hasta que salga 120
-Procedure CargarListaOrdenada(Var L: Lista);
+Procedure CargarListaOrdenada(Var L: Lista); //inciso a 
 Var 
   num: integer;
 Begin
-  randomize;
-  L := Nil;
   Repeat
     num := random(51) + 100;
-    If num <> 120 Then
-      InsertarOrdenado(L, num);
+    {If num <> 120 Then}
+    InsertarOrdenado(L, num);
   Until num = 120;
+
 End;
 
 
-// Imprime la lista en orden
-Procedure ImprimirLista(L: Lista);
+Procedure ImprimirLista(L: Lista); //inciso b 
 Begin
   writeln('Elementos de la lista ordenada:');
-  While L <> Nil Do
-    Begin
+  While L <> Nil Do Begin
       writeln(L^.dato);
       L := L^.sig;
-    End;
+  End;
 End;
 
-// Busca un elemento en la lista ordenada
-Function BuscarElementoOrdenado(L: Lista; valor: integer): boolean;
+Function BuscarElementoOrdenado(L: Lista; valor: integer): boolean; //inciso c 
 Begin
   While (L <> Nil) And (L^.dato < valor) Do
     L := L^.sig;
-  If (L <> Nil) And (L^.dato = valor) Then
+  If (L <> Nil) Then
     BuscarElementoOrdenado := true
   Else
     BuscarElementoOrdenado := false;
@@ -97,16 +92,21 @@ Var
   L: Lista;
   buscado: integer;
 Begin
+  Randomize;
+  
+  L:= nil;
+  
   CargarListaOrdenada(L);//Inciso A
+  
   ImprimirLista(L);//Inciso B 
+  
   writeln('Ingrese un valor a buscar en la lista ordenada:');
   readln(buscado);
+  
   If BuscarElementoOrdenado(L, buscado) Then //Inciso C 
     writeln('El valor ', buscado, ' se encuentra en la lista.')
   Else
     writeln('El valor ', buscado, ' NO se encuentra en la lista.');
+  
   readln;
 End.
-
-{Nota: Utilizo a menudo el readln, como en la linea 108, para que al momento de que
-me muestre por pantalla el resultado de algo no se me cierre la pantalla :D}
