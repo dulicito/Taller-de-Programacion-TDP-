@@ -1,15 +1,19 @@
 { un gimnasio necesita procesar las asistencias de sus clientes. cada
   asistencia tiene dia, mes, año, numero de cliente(entre 1 y 500) y la 
   actividad realizada(valor entre 1 y 5).
+  
   a) implemente un modulo que retorne una lista de asistencia de clientes a
   un gimnasio. las asistencias dentro de la lista deben quedar ordenadas de 
   menor a mayor por numero de cliente. generar aleatoriamente los valores hasta
   generar un valor cero para el numero de cliente.
+  
   b) implemente un modulo que reciba la lista generada en a) e imprima todos
   los valores de la lista en el mismo orden que estan almacenados.
+  
   c) implemente un modulo que reciba la lista generada en a) y un numero de 
   cliente y retorne la cantidad de asistencias del cliente recibido. Mostrar
   el resultado desde el programa principal.
+  
   d) implemente un modulo que reciba la lista generada en a) y retorne la 
   actividad con mayor cantidad de asistencias. Mostrar el resultado desde
   el programa principal.}
@@ -22,17 +26,18 @@ const
     maxdia = 31;
     maxmes = 12;
 type
-    dias = 1..maxdia;
-    meses = 1..maxmes;
-    clientes = 0..maxcli; // incluye el 0 para el corte
-    acts = 1..maxact;
+   //siempre en singular 
+    dia = 1..maxdia;
+    mes = 1..maxmes;
+    cliente = 0..maxcli; // incluye el 0 para el corte
+    act = 1..maxact;
 
     Asistencia = record
-        dia: dias;
-        mes: meses;
+        dia: dia;
+        mes: mes;
         anio: integer;
-        numcli: clientes;
-        act: acts;
+        numcli: cliente;
+        act: act;
     end;
 
     lista = ^nodo;
@@ -41,9 +46,9 @@ type
         sig: lista;
     end;
 
-    vectoractividad = array[acts] of integer;
+    vectoractividad = array[act] of integer;
 
-{------------------- PROCEDIMIENTOS AUXILIARES -------------------}
+{PROCEDIMIENTOS AUXILIARES}
 
 procedure inicializarvector(var v: vectoractividad);
 var
@@ -88,17 +93,16 @@ end;
 
 procedure imprimirregistro(r: Asistencia);
 begin
-    writeln('Cliente: ', r.numcli,
-            ' | Fecha: ', r.dia,'/',r.mes,'/',r.anio,
-            ' | Actividad: ', r.act);
+    writeln('Cliente: ', r.numcli);
+    writeln('fecha: ', r.dia, '/', r.mes, '/' , r.anio);
+    writeln('actividad: ',r.act);
 end;
 
-{------------------- INCISO A -------------------}
+{INCISO A}
 procedure cargarlista(var l: lista; var v: vectoractividad);
 var
     r: Asistencia;
 begin
-    inicializarvector(v);
     leerregistro(r);
     while (r.numcli <> 0) do begin
         v[r.act] := v[r.act] + 1;
@@ -107,7 +111,7 @@ begin
     end;
 end;
 
-{------------------- INCISO B -------------------}
+{INCISO B}
 procedure imprimir(l: lista);
 begin
     while (l <> nil) do begin
@@ -116,7 +120,7 @@ begin
     end;
 end;
 
-{------------------- INCISO C -------------------}
+{INCISO C}
 function asistenciasdelcliente(l: lista; num: integer): integer;
 var
     cant: integer;
@@ -130,7 +134,7 @@ begin
     asistenciasdelcliente := cant;
 end;
 
-{------------------- INCISO D -------------------}
+{INCISO D}
 function maxactividad(v: vectoractividad): integer;
 var
     i, maxval, pos: integer;
@@ -146,16 +150,17 @@ begin
     maxactividad := pos;
 end;
 
-{------------------- PROGRAMA PRINCIPAL -------------------}
+{ PROGRAMA PRINCIPAL}
 var
     l: lista;
     v: vectoractividad;
     num: integer;
 begin
     randomize; //nunca olvidar de declarar este randomize ;-;
+    inicializarvector(v);
     l := nil;
     cargarlista(l, v); // inciso A
-    writeln('--- LISTA DE ASISTENCIAS ---');
+    writeln('LISTA DE ASISTENCIAS:');
     imprimir(l); // inciso B
 
     writeln; writeln('Ingrese un numero de cliente: '); readln(num);
@@ -166,3 +171,4 @@ begin
     writeln('La actividad con mayor cantidad de asistencias es: ',
             maxactividad(v)); // inciso D
 end.
+{}
