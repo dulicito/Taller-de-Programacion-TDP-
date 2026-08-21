@@ -44,13 +44,6 @@ type
 		
 {---------------------------------------------------------------------}
 
-{a. Un módulo que lea información de los finales rendidos por los alumnos de la Facultad de
-Informática y los almacene en una estructura de datos. La información que se lee es legajo,
-código de materia, fecha y nota. La lectura de los alumnos finaliza con legajo 0. La estructura
-generada debe ser eficiente para la búsqueda por número de legajo y para cada alumno deben
-guardarse los finales que rindió en una lista.}
-		
-	
 procedure agregar (l:lista);
 var
     aux:lista; fecha:string;
@@ -95,6 +88,14 @@ begin
     end
 end;
 
+{ INCISO A:
+    parametros: arbol
+    almacena finales en un arbol
+    corte de control: legajo= 0 
+    
+    estructura eficiente para la busqueda por numero de legajo
+    y para cada alumno deben guardarse los finales que rindio en una lista 
+}
 
 procedure cargarAlumnos(var a:arbol);
 var 
@@ -109,8 +110,10 @@ end;
 
 {---------------------------------------------------------------------}
 
-{b. Un módulo que reciba la estructura generada en a. y retorne la cantidad de alumnos con
-legajo impar.}
+{ INCISO B:
+    parametros: arbol
+    retornar: cant alumnos con legajo impar 
+}
 
 
 function impar(a:arbol): integer;
@@ -129,8 +132,11 @@ end;
 
 
 {---------------------------------------------------------------------}
-{c. Un módulo que reciba la estructura generada en a. e informe, para cada alumno, su legajo y
-su cantidad de finales aprobados (nota mayor o igual a 4).}
+{INCISO C:
+    parametros: arbol
+    imprime de cada alumno su legajo y su cantidad de finales aprobados
+    (nota mayor o igual a 4)
+}
 
 
 function contarAprobados(l: lista): integer;
@@ -147,8 +153,7 @@ procedure informar(a: arbol);
 var
   cantAprob: integer;
 begin
-  if a <> nil then
-  begin
+  if a <> nil then begin
     informar(a^.hi);
     cantAprob := contarAprobados(a^.info.finales);
     writeln('Legajo: ', a^.info.legajo, ' - Aprobados: ', cantAprob);
@@ -158,8 +163,11 @@ end;
 
 {---------------------------------------------------------------------}
 
-{d. Un módulo que reciba la estructura generada en a. y un valor real. Este módulo debe
-retornar los legajos y promedios de los alumnos cuyo promedio supera el valor ingresado.}
+{INCISO D:
+    parametros: arbol, num (valor)
+    retornar: legajos y promedios de los alumnos cuyo promedio supera
+    el num ingresado
+}
 
 procedure promedioFinales(l: lista; var suma: real; var cant: integer);
 begin
@@ -203,7 +211,7 @@ begin
 	a:= nil;
 	randomize;
 	cargarAlumnos(a); //INCISO A 
-	writeln('La cantidad de alumnos con legajo impar fue: ',impar(a)); //INCISO B  {ahora que lo pienso puede ser un procedure pero mmm dijo el mudo, digo, dsp veo
+	writeln('La cantidad de alumnos con legajo impar fue: ',impar(a)); //INCISO B  
 	informar(a); //INCISO C 
 	writeln('Ingrese un valor: '); readln(num);
 	supera(a,num); //INCISO D
