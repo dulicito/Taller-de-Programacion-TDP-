@@ -224,7 +224,7 @@ begin
   then writeln ('No hay codigos entre ', codigo1, ' y ', codigo2)
   else begin
          writeln;
-         writeln ('El monto total entre el codigo', codigo1, ' y el codigo : ', codigo2, ' es: ', montoTotal); 
+         writeln ('El monto total entre el codigo ', codigo1, ' y el codigo: ', codigo2, ' es: ', montoTotal:2:2); 
          writeln;
        end;
   writeln;
@@ -241,4 +241,3 @@ Begin
   ModuloD (a); //inciso D 
   ModuloE (a); //inciso E 
 End.
-
