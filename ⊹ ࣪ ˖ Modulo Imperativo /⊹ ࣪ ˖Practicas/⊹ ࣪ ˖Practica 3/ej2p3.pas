@@ -83,7 +83,7 @@ type
 
 procedure CargarVenta(var v: venta);
 begin
-  v.cod := random(10); //  corta en 0
+  v.cod := random(100); //  corta en 0
   if (v.cod <> 0) then begin
     v.fecha := random(30) + 1;
     v.cant := random(20) + 1;
@@ -93,6 +93,10 @@ end;
 
 
 // arbol i.
+{
+    genera y retorna abb ordenado por codigo de producto
+    productos repetidos van a la derecha 
+}
 
 procedure Insertar1(var a: arbol1; v: venta);
 begin
@@ -110,6 +114,11 @@ end;
 
 
 // arbol ii.
+{
+    genera y retorna abb ordenado por codigo de producto 
+        cada nodo contiene:
+            codigo producto, cant total de unidades vendidas
+}
 procedure Insertar2(var a: arbol2; v: venta);
 begin
   if (a = nil) then begin
@@ -130,6 +139,11 @@ end;
 
 
 // arbol iii.
+{
+    generar y retornar abb ordenado por codigo de producto
+    cada nodo guarda:
+        codigo del producto y lista de las ventas realizadas del producto 
+}
 procedure AgregarLista(var l: lista; v: venta);
 var nue: lista;
 begin
@@ -158,7 +172,11 @@ begin
 end;
 
 
-// inciso A 
+{INCISO A:
+    genera aleatoriamente ventas
+    guarda las ventas segun el el tipo de condicion que pone cada arbol1
+    
+    corte de control: codigo producto = 0 } 
 
 
 procedure Generar(var a1: arbol1; var a2: arbol2; var a3: arbol3);
@@ -177,7 +195,10 @@ end;
 
 
 
-// inciso b 
+{INCISO B: 
+    parametros: arbol i, fecha 
+    retorna: cant total de productos vendidos en esa fecha 
+}
 function TotalFecha(a: arbol1; f: integer): integer;
 begin
   if (a = nil) then
@@ -191,7 +212,10 @@ end;
 
 
 
-// inciso c 
+{INCISO C: 
+    parametros: arbol ii, maxcod, maxCant
+    retornar: codigo del producto con mayor cantidad total de unidades vendidas
+} 
 procedure MaxUnidades(a: arbol2; var maxCod, maxCant: integer);
 begin
   if (a <> nil) then begin
@@ -206,7 +230,10 @@ end;
 
 
 
-// inciso d 
+{INCISO D: 
+    parametros: arbol iii, maxcod, maxv
+    retorna: codigo del producto con mayor cantidad de ventas 
+}
 function ContarLista(l: lista): integer;
 begin
   if (l = nil) then
@@ -231,7 +258,7 @@ end;
 
 
 
-//prog. principal.
+{programa principal}
 
 var
   a1: arbol1;
@@ -240,7 +267,7 @@ var
   fecha: integer;
   maxCod, maxCant: integer;
   maxCodV, maxV: integer;
-
+      
 begin
   randomize;
 
