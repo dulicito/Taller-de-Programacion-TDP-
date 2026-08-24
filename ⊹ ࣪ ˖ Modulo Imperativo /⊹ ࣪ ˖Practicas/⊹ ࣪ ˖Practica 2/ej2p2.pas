@@ -1,19 +1,20 @@
 { 2.- Escribir un programa que:
 
-a. Implemente un módulo recursivo que genere y retorne una lista de números enteros
-“random” en el rango 100-200. Finalizar con el número 100.
+a. Implemente un módulo recursivo que genere y retorne una lista de 
+números enteros “random” en el rango 200-230. Finalizar con el número 200.
 
-b. Un módulo recursivo que reciba la lista generada en a) e imprima los valores de 
-la lista en el mismo orden que están almacenados.
+b. Un módulo recursivo que reciba la lista generada en a) e imprima los 
+valores de la lista en el mismo orden que están almacenados.
 
-c. Implemente un módulo recursivo que reciba la lista generada en a) e imprima los 
-valores de la lista en orden inverso al que están almacenados.
+c. Implemente un módulo recursivo que reciba la lista generada en a) e 
+imprima los valores de la lista en orden inverso al que están almacenados.
 
-d. Implemente un módulo recursivo que reciba la lista generada en a) y devuelva el 
-mínimo valor de la lista.
+d. Implemente un módulo recursivo que reciba la lista generada en a) y 
+devuelva el mínimo valor de la lista.
 
-e. Implemente un módulo recursivo que reciba la lista generada en a) y un valor y 
-devuelva verdadero si dicho valor se encuentra en la lista o falso en caso contrario.}
+e. Implemente un módulo recursivo que reciba la lista generada en a) y 
+un valor y devuelva verdadero si dicho valor se encuentra en la lista o 
+falso en caso contrario.}
 
 
 program ej2p2;
@@ -26,27 +27,32 @@ type
         end;
         
 {------------------------------------------------------------------------------}
-{A. Implemente un módulo recursivo que genere y retorne una lista de números enteros
-“random” en el rango 100-200. Finalizar con el número 100.}
+
+{ INCISO A: 
+	objetivo: modulo recursivo que genera y retorna una lista
+			  de numeros enteros random
+			  *rango= 200-230
+			  * corte de control: numero 200}
 
 procedure generarlista(var l: lista);
 var
   num: integer;
 begin
-  num := random(101) + 100;   { genera entre 100 y 200 }
-  if (num <> 100) then
-  begin
+  num := random(31) + 200;  
+  if (num <> 200) then begin
     new(l);
     l^.info := num;
-    generarlista(l^.sig);     { sigue generando }
+    generarlista(l^.sig);     
   end
   else
-    l := nil;                 { corte de la lista }
+    l := nil;                 
 end;
 
 {------------------------------------------------------------------------------}
-{b. Un módulo recursivo que reciba la lista generada en a) e imprima los valores de 
-la lista en el mismo orden que están almacenados.}
+{ INCISO B: 
+*  	recibo: lista
+* 	pide imprimir los valores de la lista(recorrerlo)
+	}
 
 procedure imprimir(l:lista);
 begin
@@ -57,24 +63,24 @@ begin
 end;
 
 {------------------------------------------------------------------------------}
-{c. Implemente un módulo recursivo que reciba la lista generada en a) e imprima los 
-valores de la lista en orden inverso al que están almacenados.}
 
-{anotacion: el imprimirinverso es distinto que el realizado en el 
-inciso B, lamentablemente ambos son distintos, sino se reutilizaria :c}
-
+{ INCISO C: 
+* 	similar a INCISO B, solo pide imprimir al reves.
+	}
 procedure imprimirinverso(l: lista); // INCISO C 
 begin
   if (l <> nil) then begin
-    imprimirinverso(l^.sig); { primero baja al final }
-    writeln(L^.info);             { imprime al volver }
+    imprimirinverso(l^.sig); 
+    writeln(L^.info);             
   end;
 end;
 
 {-------------------------------------------------------------------------------}
-{d. Implemente un módulo recursivo que reciba la lista generada en a) y devuelva el 
-mínimo valor de la lista.}
 
+{ INCISO D: 
+* 	recibo la lista 
+* 	y devolver el minimo valor de la lista
+	}
 function minimo(l: lista; min: integer): integer;
 begin
   if (l = nil) then
@@ -89,9 +95,12 @@ end;
 
 
 {-------------------------------------------------------------------------------}
-{e. Implemente un módulo recursivo que reciba la lista generada en a) y un valor y 
-devuelva verdadero si dicho valor se encuentra en la lista o falso en caso contrario.}
 
+{ INCISO E: 
+* 	recibo la lista y un valor
+* 	retorno un boolean que muestra si el valor se encontro en la lista
+	}
+	
 function seencontro(l: lista; valor: integer): boolean;
 begin
   if (l = nil) then
