@@ -21,8 +21,13 @@ type
 
 {-------------------------------------------------------------}
 { INCISO A:
-  Genera recursivamente un vector de hasta 20 caracteres.
-  La lectura termina cuando se ingresa '.'
+  OBJETIVO:
+  Cargar recursivamente en un vector los caracteres de una palabra
+  hasta encontrar el caracter '.' o alcanzar el máximo de 20 caracteres.
+
+  PARAMETROS:
+  v: vector donde se almacenan los caracteres.
+  cant: cantidad de caracteres almacenados.
 }
 
 procedure cargarvector(var v: vector; var cant: integer);
@@ -42,7 +47,18 @@ end;
 
 {-------------------------------------------------------------}
 { INCISO B:
-  Determina recursivamente si la palabra es un palindromo.
+  OBJETIVO:
+  Determinar recursivamente si la palabra es un palindromo,
+  comparando los caracteres desde los extremos hacia el centro.
+
+  PARAMETROS:
+  v: vector que contiene la palabra.
+  ini: posicion inicial a comparar.
+  fin: posicion final a comparar.
+
+  RETORNA:
+  true si la palabra es palindromo.
+  false si no es palindromo.
 }
 
 function esPalindromo(v: vector; ini, fin: integer): boolean;
@@ -65,7 +81,7 @@ var
 begin
   cant := 0;
 
-  writeln('Ingrese una palabra caracter por caracter.');
+  writeln('Ingrese una palabra caracter por caracter');
   writeln('Finalice con "."');
 
   cargarvector(v, cant);
