@@ -160,9 +160,8 @@ begin
   i := 0;
   aux := v[3]; // Usamos puntero auxiliar para no modificar la lista original
 
-  while (aux <> nil) and (i < 20) do begin
+  while (aux <> nil) and (i <= 20) do begin
     i := i + 1;
-    diml := i;
     v3[i] := aux^.info; // Copiamos el producto al vector
     aux := aux^.sig;
   end;
