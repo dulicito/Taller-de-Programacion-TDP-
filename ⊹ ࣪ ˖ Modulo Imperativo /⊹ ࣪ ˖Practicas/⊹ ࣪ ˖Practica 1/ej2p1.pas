@@ -40,11 +40,7 @@
     * parametros: vector, dl
     * objetivo: cargar un vector(300 oficinas) SIN ORDEN
                 hasta que codigo identificacion = -1 o
-                hasta que se cargue todo el vector. 
-                
-                
-     principal duda: preguntar si esta bien aplicado guardar
-     los datos SIN ORDEN.}
+                hasta que se cargue todo el vector. }
                 
     procedure generarVector (var v:vector; var dl:integer); 
     var 
