@@ -100,24 +100,15 @@ begin
 end;
 
 {-----------------------------------------------------------------------------------}
-function maxCodigo(l:lista):mejorPelicula;
-var
-  maxPeli: mejorPelicula;
+procedure calcularmax(l:lista;var maxcod:integer; var maxpunt:real);
 begin
-  maxPeli.codigo := -1;
-  maxPeli.puntaje := -1;
-
-  while (l <> nil) do
-  begin
-    if l^.dato.puntaje > maxPeli.puntaje then
-    begin
-      maxPeli.codigo := l^.dato.codigo;
-      maxPeli.puntaje := l^.dato.puntaje;
+  while (l <> nil) do begin
+    if l^.dato.puntaje > maxpunt then begin
+      maxcod := l^.dato.codigo;
+      maxpunt := l^.dato.puntaje;
     end;
     l := l^.sig;
   end;
-
-  maxCodigo := maxPeli;
 end;
 
 
@@ -125,15 +116,17 @@ end;
 * parametros: vector peliculas y vector maximos
 * 
 * un vector de maximos que devuelve :
-* 			codigo pelicula con mayor puntaje
-* 
-* }
+* 			codigo pelicula con mayor puntaje }
 procedure obtenerMaximos(peliculas:vector; var vectorMax: vectorMaximos);
 var
-	i:rango_genero;
+	i:rango_genero;maxcod: integer; maxpunt:real;
 begin
-	for i:= 1 to 8 do
-		vectorMax[i]:= maxCodigo(peliculas[i]);
+	for i:= 1 to 8 do begin
+	    maxcod:= -9999;maxpunt:= -9999;
+	    calcularmax(peliculas[i],maxcod,maxpunt);
+	    vectorMax[i].codigo:= maxcod;
+	    vectorMax[i].puntaje:= maxpunt;
+    end;
 end;
 
 {-----------------------------------------------------------------------------------}
