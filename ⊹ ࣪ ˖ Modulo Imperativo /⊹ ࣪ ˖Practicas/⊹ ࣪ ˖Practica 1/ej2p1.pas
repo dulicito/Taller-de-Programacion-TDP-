@@ -28,6 +28,14 @@
     begin
 		writeln('ingrese el codigo de la oficina');
         readln(r. codigo);
+        
+    {obligo al usuario a ingresar un numero mayor a -1}
+    
+    while r.codigo < -1 do begin
+        writeln('Codigo invalido. Ingrese un codigo mayor o igual a -1:');
+        readln(r.codigo);
+    end;
+    
         if (r.codigo <> corte)then begin
 			writeln('ingrese el dni del propietario');
             readln(r.dni);
@@ -38,7 +46,7 @@
     
     {INCISO A:
     * parametros: vector, dl
-    * objetivo: cargar un vector(300 oficinas) SIN ORDEN
+    * objetivo: cargar un vector(300 oficinas) SIN ORDEN(usamos while)
                 hasta que codigo identificacion = -1 o
                 hasta que se cargue todo el vector. }
                 
@@ -46,35 +54,34 @@
     var 
         r:oficina; 
     begin
-        writeln('ingrese los datos de la oficina: ', dl+1);
         leeroficina(r);
         while (r.codigo <> corte) and (dl < maxofi)do begin
+            writeln('-------------------------------');
             dl:= dl + 1;
             v[dl]:= r;
-            writeln('ingrese los datos de la oficina: ',dl+1);
             leeroficina(r);
         end; 
     end;
         
 	{INCISO B:
 	* ninguna duda. }
-	
-    procedure seleccion (var v:vector; dl:integer); //inciso b 
-    Var
-        i,j,pos:integer;
-        item:oficina; 
+    
+    procedure seleccion(var v: vector; dl: integer);
+    var
+        i, j, pos: integer;
+        item: oficina;
     begin
-        for i:=1 to dl -1 do begin
-            pos:=i;
-            for j:= i+1 to dl do begin
-                if (v[j].codigo < v[pos].codigo) then
-                    pos:=j;
-                item:=v[pos];
-                v[pos]:=v[i];
-                v[i]:=item;
-             end;
-         end;
-    end;
+        for i := 1 to dl - 1 do begin
+            pos := i;
+            for j := i + 1 to dl do begin
+                if v[j].codigo < v[pos].codigo then
+                    pos := j;
+            end;
+            item := v[pos];
+            v[pos] := v[i];
+            v[i] := item;
+        end;
+    end;    
     
     
     var
