@@ -26,218 +26,243 @@ f. Calcule el promedio de los precios del vector resultante del punto d).}
 
 
 program ej4p1;
+
 const
-    maxrubro= 6;
+    maxrubro = 6;
+    maxproductos = 20;
+
 type
-    rango_rubro=1..maxrubro;
-    producto= record 
-        codigo:integer;
-        codigo_rubro:rango_rubro;
+    rango_rubro = 1..maxrubro;
+
+    producto = record
+        codigo: integer;
+        codigo_rubro: rango_rubro;
         precio: real;
     end;
-    
-    lista_productos=^nodo;
-        nodo=record
-            info:producto;
-            sig:lista_productos;
-        end;
-        
-    vector= array [rango_rubro] of lista_productos;
-    
-    rubro3= array[1..20]of producto;
+
+    lista_productos = ^nodo;
+
+    nodo = record
+        info: producto;
+        sig: lista_productos;
+    end;
+
+    vector = array[rango_rubro] of lista_productos;
+
+    rubro3 = array[1..maxproductos] of producto;
+
 
 {-----------------------------------------------------------------------------}
+{ inicializamos vector }
 
-procedure inicializar (var v:vector);
+procedure inicializar(var v: vector);
 var
-    i:rango_rubro;
+    i: rango_rubro;
 begin
-    for i:= 1 to maxrubro do 
-        v[i]:= nil;
+    for i := 1 to maxrubro do
+        v[i] := nil;
 end;
 
-procedure leerProducto (var p:producto);
+
+{-----------------------------------------------------------------------------}
+{ leemos producto }
+
+procedure leerProducto(var p: producto);
 begin
-    p.precio:= random (102)-1; {genera numeros entre -1 (el corte de control)y el 100}
-    if (p.precio <> -1)then begin 
-        p.codigo:= random(100)+1; {usado de ejemplo}
-        p.codigo_rubro:= random(6)+1;
+    p.precio := random(102) - 1; { genera valores entre -1 y 100 }
+
+    if p.precio <> -1 then begin
+        p.codigo := random(100) + 1;
+        p.codigo_rubro := random(maxrubro) + 1;
     end;
 end;
+
+
+{-----------------------------------------------------------------------------}
+{ insertar ordenado por codigo }
 
 procedure insertarOrdenado(var l: lista_productos; p: producto);
 var
-  nuevo, actual, anterior: lista_productos;
+    nuevo, actual, anterior: lista_productos;
 begin
-  new(nuevo);
-  nuevo^.info := p;
-  nuevo^.sig := nil;
+    new(nuevo);
+    nuevo^.info := p;
+    nuevo^.sig := nil;
 
-  // Si la lista esta vacia o el nuevo codigo es menor al primero
-  if (l = nil) or (p.codigo < l^.info.codigo) then
-  begin
-    nuevo^.sig := l;
-    l := nuevo;
-  end
-  else
-  begin
-    anterior := l;
-    actual := l^.sig;
+    if (l = nil) or (p.codigo < l^.info.codigo) then begin
+        nuevo^.sig := l;
+        l := nuevo;
+    end
+    else begin
+        anterior := l;
+        actual := l^.sig;
 
-    // Recorremos mientras no lleguemos al final y el codigo sea mayor
-    while (actual <> nil) and (p.codigo > actual^.info.codigo) do
-    begin
-      anterior := actual;
-      actual := actual^.sig;
+        while (actual <> nil) and (p.codigo > actual^.info.codigo) do begin
+            anterior := actual;
+            actual := actual^.sig;
+        end;
+
+        nuevo^.sig := actual;
+        anterior^.sig := nuevo;
     end;
-
-    nuevo^.sig := actual;
-    anterior^.sig := nuevo;
-  end;
 end;
 
-{INCISO A 
-* parametros: vector
-* objetivo: almacenar en un vector(agrupados por rubros) los productos, 
-            cada posicion del vector contiene una lista de productos ordenados 
-            por codigo de producto. 
-  corte de control= precio = -1 }
-  
-procedure cargarvector(var v:vector);
+
+{-----------------------------------------------------------------------------}
+{ INCISO A
+  Almacenar los productos agrupados por rubro y ordenados por codigo. }
+
+procedure cargarVector(var v: vector);
 var
-    p:producto;
+    p: producto;
 begin
     leerProducto(p);
-    while (p.precio <> -1)do begin 
-        insertarOrdenado(v[p.codigo_rubro],p);
+
+    while p.precio <> -1 do begin
+        insertarOrdenado(v[p.codigo_rubro], p);
         leerProducto(p);
     end;
 end;
 
-{------------------------------------------------------------------------------}
 
-procedure imprimirlista (l:lista_productos);
+{-----------------------------------------------------------------------------}
+{ imprimimos lista }
+
+procedure imprimirLista(l: lista_productos);
 begin
-    if (l = nil)then
+    if l = nil then
         writeln('La lista se encuentra vacia')
-    else
-    while (l <> nil) do begin
-        writeln('Codigo del producto: ',l^.info.codigo);
-        writeln('Precio del producto: ',l^.info.precio:2:2);
-        l:= l^.sig;
+    else begin
+        while l <> nil do begin
+            writeln('Codigo del producto: ', l^.info.codigo);
+            writeln('Precio del producto: ', l^.info.precio:2:2);
+            l := l^.sig;
+        end;
     end;
 end;
 
-{ INCISO B 
-* parametros: vector
-* objetivo: imprimir los productos de cada rubro }
 
-procedure imprimir (v:vector); // INCISO B 
+{-----------------------------------------------------------------------------}
+{ INCISO B
+  Mostrar los productos pertenecientes a cada rubro. }
+
+procedure imprimir(v: vector);
 var
-    i:integer;
+    i: rango_rubro;
 begin
-    for i:= 1 to maxrubro do begin 
-        writeln('Datos del rubro: ',i);
-        imprimirlista(v[i]);
+    for i := 1 to maxrubro do begin
+        writeln('Datos del rubro: ', i);
+        imprimirLista(v[i]);
         writeln('--------------------------------------------------');
     end;
 end;
 
-{-------------------------------------------------------------------------------}
-{ INCISO C: 
-* parametros: vector original, nuevo vector de rubro 3 y su diml 
-* objetivo: cargar un vector(a lo sumo 20 elementos) con los productos
- 			del rubro 3
- 
-  si cant productos > 20, almacenamos los primeros 20.
-* }
+
+{-----------------------------------------------------------------------------}
+{ INCISO C
+  Cargar hasta 20 productos del rubro 3.
+  Se toman los primeros 20 de la lista. }
 
 procedure cargarRubro3(v: vector; var v3: rubro3; var diml: integer);
 var
-  i: integer;
-  aux: lista_productos;
+    aux: lista_productos;
 begin
-  i := 0;
-  aux := v[3]; // Usamos puntero auxiliar para no modificar la lista original
+    diml := 0;
+    aux := v[3];
 
-  while (aux <> nil) and (i <= 20) do begin
-    i := i + 1;
-    v3[i] := aux^.info; // Copiamos el producto al vector
-    aux := aux^.sig;
-  end;
-  
-end;
-
-{------------------------------------------------------------------------------}
-{INCISO D:
-* parametros: vector del rubro 3, su diml
-* objetivo: ordenar por precio los elementos del vector}
-
-procedure selecion (var v : rubro3; diml : integer); // INCISO D 
-var
-	i, j, pos : integer;
-	item : producto;
-begin
-	for i := 1 to diml - 1 do
-		begin
-			pos := i;
-			for j := i + 1 to diml do
-				if (v[j].precio < v[pos].precio) then
-					pos := j;
-			item := v[pos];
-			v[pos] := v[i];
-			v[i] := item;
-		end;
-end;
-
-
-{-----------------------------------------------------------------------------}
-{INCISO E:
-* parametros: vector del rubro 3, su diml
-* objetivo: imprimir en pantalla su contenido  }
-
-procedure imprimir2 (v:rubro3;diml:integer); // INCISO E 
-var
-    i:integer;
-begin
-    writeln('1eros 20 productos guardados del rubro 3: ');
-    for i:= 1 to diml do begin 
-        writeln('Producto nro: ',i);
-        writeln('Codigo: ',v[i].codigo);
-        writeln('Precio: ',v[i].precio:2:2);
-        writeln();
+    while (aux <> nil) and (diml < maxproductos) do begin
+        diml := diml + 1;
+        v3[diml] := aux^.info;
+        aux := aux^.sig;
     end;
 end;
 
+
 {-----------------------------------------------------------------------------}
-{INCISO F: 
-* parametros: vector rubro 3, su diml
-* objetivo: calcular promedio de precios del vector }
+{ INCISO D
+  Ordenar el vector de rubro 3 por precio usando selección. }
 
-
-function prom (v:rubro3; diml:integer):real;
+procedure seleccion(var v: rubro3; diml: integer);
 var
-    suma:real;
-    i:integer;
+    i, j, pos: integer;
+    item: producto;
 begin
-    suma:= 0;
-    for i:= 1 to diml do 
-        suma:= suma + v[i].precio;
-    prom:= suma / diml;
+    for i := 1 to diml - 1 do begin
+        pos := i;
+
+        for j := i + 1 to diml do
+            if v[j].precio < v[pos].precio then
+                pos := j;
+
+        item := v[pos];
+        v[pos] := v[i];
+        v[i] := item;
+    end;
 end;
 
-{----------------------------------------------------------------------------}
+
+{-----------------------------------------------------------------------------}
+{ INCISO E
+  Mostrar los precios del vector ordenado. }
+
+procedure imprimir2(v: rubro3; diml: integer);
+var
+    i: integer;
+begin
+    writeln('Productos del rubro 3:');
+
+    for i := 1 to diml do begin
+        writeln('Producto nro: ', i);
+        writeln('Codigo: ', v[i].codigo);
+        writeln('Precio: ', v[i].precio:2:2);
+        writeln;
+    end;
+end;
+
+
+{-----------------------------------------------------------------------------}
+{ INCISO F
+  Calcular promedio de los precios. }
+
+function promedio(v: rubro3; diml: integer): real;
+var
+    suma: real;
+    i: integer;
+begin
+    suma := 0;
+
+    for i := 1 to diml do
+        suma := suma + v[i].precio;
+
+    if diml > 0 then
+        promedio := suma / diml
+    else
+        promedio := 0;
+end;
+
+
+{-----------------------------------------------------------------------------}
+{ programa principal }
 
 var
-    v:vector; v3:rubro3; diml:integer;
+    v: vector;
+    v3: rubro3;
+    diml: integer;
+
 begin
     randomize;
-    diml:= 0; 
     inicializar(v);
-    cargarvector(v); //INCISO A 
-    imprimir(v); // INCISO B 
-    cargarrubro3(v,v3,diml); //INCISO C 
-    selecion(v3,diml); //INCISO D 
-    imprimir2(v3,diml); //INCISO E 
-    writeln('el promedio de los precios de productos del rubro 3 es: ',prom(v3,diml):2:2); // INCISO F 
+    cargarVector(v);                    { INCISO A }
+    imprimir(v);                        { INCISO B }
+    cargarRubro3(v, v3, diml);          { INCISO C }
+    seleccion(v3, diml);                { INCISO D }
+    imprimir2(v3, diml);                { INCISO E }
+
+    if diml > 0 then
+        writeln('El promedio de los precios del rubro 3 es: ',
+                promedio(v3, diml):2:2)
+    else
+        writeln('No hay productos del rubro 3.');
+
 end.
+
