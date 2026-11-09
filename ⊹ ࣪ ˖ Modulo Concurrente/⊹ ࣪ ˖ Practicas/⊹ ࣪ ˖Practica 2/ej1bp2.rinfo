@@ -1,0 +1,63 @@
+programa P2ej1b
+{ ENUNCIADO - Practica 2, Ejercicio 1 b) (2026):
+  Modifique el ejercicio anterior, considerando que ahora habra un robot
+  fiscalizador, que sera responsable de informar la diferencia de flores
+  que obtuvo el ganador con respecto al perdedor. El robot fiscalizador se
+  ubica en la esquina (2,1). }
+
+{ RESOLUCION:
+  - Ahora los 2 competidores hacen lo mismo (juntar y mandarle al
+    fiscalizador): alcanza con UN tipo.
+  - El fiscalizador recibe 2 mensajes con * (en el orden en que lleguen,
+    sin forzar un orden). Para la diferencia NO hace falta saber quien
+    mando cada valor, asi que no se necesitan identificadores.
+  - Areas: los dos tramos y la esquina del fiscalizador son privados. }
+procesos
+  proceso juntarFlores(ES f: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      f := f + 1
+  fin
+  proceso juntarTramo(ES f: numero)
+  comenzar
+    repetir 9
+      juntarFlores(f)
+      mover
+    juntarFlores(f)
+  fin
+areas
+  tramo1: AreaP(1,1,1,10)
+  tramo2: AreaP(2,11,2,20)
+  esqFiscal: AreaP(2,1,2,1)
+robots
+  robot competidor
+  variables
+    f: numero
+  comenzar
+    f := 0
+    juntarTramo(f)
+    EnviarMensaje(f, fisc)
+  fin
+  robot fiscalizador
+  variables
+    a, b: numero
+  comenzar
+    RecibirMensaje(a, *)
+    RecibirMensaje(b, *)
+    si (a >= b)
+      Informar('Diferencia', a - b)
+    sino
+      Informar('Diferencia', b - a)
+  fin
+variables
+  r1, r2: competidor
+  fisc: fiscalizador
+comenzar
+  AsignarArea(r1, tramo1)
+  AsignarArea(r2, tramo2)
+  AsignarArea(fisc, esqFiscal)
+  Iniciar(r1, 1, 1)
+  Iniciar(r2, 2, 11)
+  Iniciar(fisc, 2, 1)
+fin

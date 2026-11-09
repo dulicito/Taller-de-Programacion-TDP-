@@ -1,0 +1,105 @@
+programa P2ej2
+{ ENUNCIADO - Practica 2, Ejercicio 2 (2026):
+  Realice un programa en el que 3 robots realizan una escalera de 4
+  escalones cada uno. Todos los escalones tienen un ancho fijo de 1, y un
+  alto aleatorio entre 1 y 5. Al finalizar el recorrido, cada robot debera
+  enviar al robot jefe la cantidad de escalones que tenian mas flores que
+  papeles. Una vez que los tres robots finalizaron, el robot jefe debera
+  informar la suma de las cantidades enviadas por los 3 robots.
+  - El robot jefe inicia en la esquina (1,1)
+  - El robot 1 inicia en la esquina (2,1)
+  - El robot 2 inicia en la esquina (20,1)
+  - El robot 3 inicia en la esquina (40,1) }
+
+{ RESOLUCION:
+  - Cada escalon: alto aleatorio "a" (Random(a,1,5), uno nuevo por escalon),
+    sube "a" esquinas y avanza 1 a la derecha. Se cuentan las a+1 esquinas
+    que se pisan antes del inicio del escalon siguiente; la esquina final
+    de la escalera se suma al escalon 4.
+  - Se cuentan flores y papeles juntandolos (el enunciado no pide dejar las
+    esquinas sin modificar).
+  - PEOR CASO para las areas: 4 escalones de alto 5 = 20 calles -> desde la
+    calle 1 se llega a la 21; ancho 4 -> 4 avenidas mas. Robot 1: (2,1)-(6,21),
+    robot 2: (20,1)-(24,21), robot 3: (40,1)-(44,21). No se superponen:
+    3 areas PRIVADAS, sin bloqueos.
+  - Los 3 robots hacen lo mismo: 1 tipo. El jefe solo suma, asi que recibe
+    3 mensajes con * sin necesidad de identificadores. }
+procesos
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  proceso contarEsquina(ES f: numero; ES p: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      f := f + 1
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      p := p + 1
+  fin
+  proceso escalon(E alto: numero; ES f: numero; ES p: numero)
+  { Sube "alto" esquinas y avanza 1 a la derecha; termina mirando al norte. }
+  comenzar
+    repetir alto
+      contarEsquina(f, p)
+      mover
+    derecha
+    contarEsquina(f, p)
+    mover
+    izquierda
+  fin
+  proceso escalera(ES cant: numero)
+  variables
+    alto, f, p, i: numero
+  comenzar
+    i := 1
+    repetir 4
+      Random(alto, 1, 5)
+      f := 0
+      p := 0
+      escalon(alto, f, p)
+      si (i = 4)
+        contarEsquina(f, p)   { esquina final de la escalera }
+      si (f > p)
+        cant := cant + 1
+      i := i + 1
+  fin
+areas
+  escalera1: AreaP(2,1,6,21)
+  escalera2: AreaP(20,1,24,21)
+  escalera3: AreaP(40,1,44,21)
+  esqJefe: AreaP(1,1,1,1)
+robots
+  robot escalador
+  variables
+    cant: numero
+  comenzar
+    cant := 0
+    escalera(cant)
+    EnviarMensaje(cant, jefe)
+  fin
+  robot tipoJefe
+  variables
+    cant, total: numero
+  comenzar
+    total := 0
+    repetir 3
+      RecibirMensaje(cant, *)
+      total := total + cant
+    Informar('TotalEscalones', total)
+  fin
+variables
+  r1, r2, r3: escalador
+  jefe: tipoJefe
+comenzar
+  AsignarArea(r1, escalera1)
+  AsignarArea(r2, escalera2)
+  AsignarArea(r3, escalera3)
+  AsignarArea(jefe, esqJefe)
+  Iniciar(r1, 2, 1)
+  Iniciar(r2, 20, 1)
+  Iniciar(r3, 40, 1)
+  Iniciar(jefe, 1, 1)
+fin

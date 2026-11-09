@@ -1,0 +1,71 @@
+programa P2ej1a
+{ ENUNCIADO - Practica 2, Ejercicio 1 (2026):
+  Dos robots compiten para ver cual junta mas flores. El primer robot recoge
+  todas las flores de la avenida 1 entre las calles 1 y 10. El segundo robot
+  recoge todas las flores de la avenida 2, entre las calles 11 y 20.
+  Al finalizar el recorrido, el robot que recogio mayor cantidad de flores
+  debe informar la diferencia de flores que obtuvo respecto al robot
+  perdedor (el que obtuvo menos flores).
+  Los robots inician en las esquinas (1,1) y (2,11) respectivamente. }
+
+{ RESOLUCION:
+  - Sin fiscalizador, cada robot necesita conocer la cantidad del OTRO:
+    cada uno ENVIA su cantidad al otro y despues RECIBE la del otro.
+    No hay deadlock: el envio es asincronico (no espera), asi que los dos
+    envian y despues los dos reciben.
+  - Se usan 2 TIPOS porque cada uno le envia a un robot distinto (r1 a r2
+    y r2 a r1) y en el codigo hay que nombrar la variable robot destino.
+    El recorrido se comparte en el proceso juntarTramo.
+  - Empate: para que informe exactamente uno, r1 usa ">=" y r2 usa ">".
+    Si empatan, r1 informa diferencia 0.
+  - Areas privadas: los tramos no se tocan, no hay nada que bloquear. }
+procesos
+  proceso juntarFlores(ES f: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      f := f + 1
+  fin
+  proceso juntarTramo(ES f: numero)
+  { 10 esquinas hacia el norte desde la esquina actual. }
+  comenzar
+    repetir 9
+      juntarFlores(f)
+      mover
+    juntarFlores(f)
+  fin
+areas
+  tramo1: AreaP(1,1,1,10)
+  tramo2: AreaP(2,11,2,20)
+robots
+  robot competidor1
+  variables
+    mias, otras: numero
+  comenzar
+    mias := 0
+    juntarTramo(mias)
+    EnviarMensaje(mias, r2)
+    RecibirMensaje(otras, r2)
+    si (mias >= otras)
+      Informar('Diferencia', mias - otras)
+  fin
+  robot competidor2
+  variables
+    mias, otras: numero
+  comenzar
+    mias := 0
+    juntarTramo(mias)
+    EnviarMensaje(mias, r1)
+    RecibirMensaje(otras, r1)
+    si (mias > otras)
+      Informar('Diferencia', mias - otras)
+  fin
+variables
+  r1: competidor1
+  r2: competidor2
+comenzar
+  AsignarArea(r1, tramo1)
+  AsignarArea(r2, tramo2)
+  Iniciar(r1, 1, 1)
+  Iniciar(r2, 2, 11)
+fin

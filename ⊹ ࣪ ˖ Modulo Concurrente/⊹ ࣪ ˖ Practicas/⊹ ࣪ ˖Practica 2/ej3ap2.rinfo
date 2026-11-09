@@ -1,0 +1,124 @@
+programa P2ej3a
+{ ENUNCIADO - Practica 2, Ejercicio 3 (2026):
+  Realice un programa con 2 equipos.
+  - El equipo A, compuesto por los robots A1 y A2, debe juntar papeles de
+    las primeras 20 esquinas de la calle 5
+  - El equipo B, compuesto por los robots B1 y B2, debe juntar papeles de
+    las primeras 20 esquinas de la calle 7
+  Ademas existe un robot Fiscalizador que envia las identificaciones
+  necesarias.
+  Los robots A1 y B1 deberan realizar las 10 primeras esquinas de su
+  recorrido, y al finalizar avisaran a los robots A2 y B2 respectivamente
+  para que continuen con las siguientes 10 esquinas. Al finalizar el
+  Fiscalizador debe informar que equipo fue el ganador.
+  Inicialice los robots en las esquinas que considere mas apropiadas segun
+  el trayecto que le corresponde realizar a cada uno. El Fiscalizador inicia
+  en la esquina (1,1). }
+
+{ RESOLUCION (modelo: PASSING THE BATON dentro de cada equipo):
+  - Esquinas de inicio: A1 (1,5), A2 (11,5), B1 (1,7), B2 (11,7). Cada uno
+    arranca al principio de su tramo de 10 esquinas.
+  - TIPOS: "inicial" (A1, B1) y "final" (A2, B2), porque hacen cosas
+    distintas: el inicial avisa a su companiero y el final espera ese aviso y
+    reporta al fiscalizador. Los dos de un mismo tipo se diferencian por el
+    id de equipo (1 = A, 2 = B) que les manda el fiscalizador; con el id
+    saben a que robot enviarle o de cual recibir.
+  - El aviso del inicial lleva su cantidad de papeles: asi el final suma y
+    reporta el total del equipo (el testigo "lleva" el acumulado).
+  - El final recibe del companiero NOMBRADO (a1 o b1), no con *: solo debe
+    esperar a su companiero.
+  - Fiscalizador: patron ID + dato. Recibe el id de equipo con * y el total
+    del robot final de ESE equipo.
+  - Areas: cada tramo de 10 esquinas es un AreaP de un solo robot. Los
+    tramos no se tocan: no hay bloqueos. }
+procesos
+  proceso juntarPapeles(ES p: numero)
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      p := p + 1
+  fin
+  proceso tramo(ES p: numero)
+  { 10 esquinas hacia el este desde la esquina actual. }
+  comenzar
+    repetir 9
+      juntarPapeles(p)
+      mover
+    juntarPapeles(p)
+  fin
+  proceso asignarIds
+  comenzar
+    EnviarMensaje(1, a1)
+    EnviarMensaje(1, a2)
+    EnviarMensaje(2, b1)
+    EnviarMensaje(2, b2)
+  fin
+areas
+  tramoA1: AreaP(1,5,10,5)
+  tramoA2: AreaP(11,5,20,5)
+  tramoB1: AreaP(1,7,10,7)
+  tramoB2: AreaP(11,7,20,7)
+  esqFiscal: AreaP(1,1,1,1)
+robots
+  robot inicial
+  variables
+    id, p: numero
+  comenzar
+    p := 0
+    derecha
+    tramo(p)
+    RecibirMensaje(id, fisc)    { recien lo necesita para saber a quien avisar }
+    si (id = 1)
+      EnviarMensaje(p, a2)
+    sino
+      EnviarMensaje(p, b2)
+  fin
+  robot final
+  variables
+    id, p: numero
+  comenzar
+    RecibirMensaje(id, fisc)
+    si (id = 1)
+      RecibirMensaje(p, a1)     { espera el testigo de su companiero }
+    sino
+      RecibirMensaje(p, b1)
+    derecha
+    tramo(p)
+    EnviarMensaje(id, fisc)
+    EnviarMensaje(p, fisc)
+  fin
+  robot fiscalizador
+  variables
+    id, t, tA, tB: numero
+  comenzar
+    asignarIds
+    repetir 2
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(tA, a2)
+      sino
+        RecibirMensaje(tB, b2)
+    si (tA > tB)
+      Informar('GanoEquipoA', tA)
+    sino
+      si (tB > tA)
+        Informar('GanoEquipoB', tB)
+      sino
+        Informar('Empate', tA)
+  fin
+variables
+  a1, b1: inicial
+  a2, b2: final
+  fisc: fiscalizador
+comenzar
+  AsignarArea(a1, tramoA1)
+  AsignarArea(a2, tramoA2)
+  AsignarArea(b1, tramoB1)
+  AsignarArea(b2, tramoB2)
+  AsignarArea(fisc, esqFiscal)
+  Iniciar(a1, 1, 5)
+  Iniciar(a2, 11, 5)
+  Iniciar(b1, 1, 7)
+  Iniciar(b2, 11, 7)
+  Iniciar(fisc, 1, 1)
+fin

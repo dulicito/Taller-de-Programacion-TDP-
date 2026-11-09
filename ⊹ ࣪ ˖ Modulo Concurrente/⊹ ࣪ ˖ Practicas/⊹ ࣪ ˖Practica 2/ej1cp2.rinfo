@@ -1,0 +1,82 @@
+programa P2ej1c
+{ ENUNCIADO - Practica 2, Ejercicio 1 c) (2026):
+  Modifique el ejercicio anterior para que ahora participen 6 robots
+  - Robot 1: Avenida 1, entre las calles 1 y 10
+  - Robot 2: Avenida 2, entre las calles 11 y 20
+  - Robot 3: Avenida 3, entre las calles 21 y 30
+  - Robot 4: Avenida 4, entre las calles 31 y 40
+  - Robot 5: Avenida 5, entre las calles 41 y 50
+  - Robot 6: Avenida 6, entre las calles 51 y 60
+  - Fiscalizador: Avenida 2, calle 1
+  El fiscalizador debera informar la cantidad de flores que junto el robot
+  que junto la mayor cantidad de flores. }
+
+{ RESOLUCION:
+  - Un tipo para los 6 competidores (misma tarea) y uno para el fiscalizador.
+  - El fiscalizador recibe 6 cantidades con * dentro de un repetir 6 y se
+    queda con el maximo. Solo pide la CANTIDAD maxima, no quien fue: no
+    hacen falta identificadores.
+  - max empieza en -1 para que un 0 tambien pueda ser el maximo.
+  - 6 areas privadas + la esquina privada del fiscalizador: (2,1) no se
+    superpone con el tramo del robot 2, que empieza en la calle 11. }
+procesos
+  proceso juntarFlores(ES f: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      f := f + 1
+  fin
+  proceso juntarTramo(ES f: numero)
+  comenzar
+    repetir 9
+      juntarFlores(f)
+      mover
+    juntarFlores(f)
+  fin
+areas
+  tramo1: AreaP(1,1,1,10)
+  tramo2: AreaP(2,11,2,20)
+  tramo3: AreaP(3,21,3,30)
+  tramo4: AreaP(4,31,4,40)
+  tramo5: AreaP(5,41,5,50)
+  tramo6: AreaP(6,51,6,60)
+  esqFiscal: AreaP(2,1,2,1)
+robots
+  robot competidor
+  variables
+    f: numero
+  comenzar
+    f := 0
+    juntarTramo(f)
+    EnviarMensaje(f, fisc)
+  fin
+  robot fiscalizador
+  variables
+    f, max: numero
+  comenzar
+    max := -1
+    repetir 6
+      RecibirMensaje(f, *)
+      si (f > max)
+        max := f
+    Informar('MaximoFlores', max)
+  fin
+variables
+  r1, r2, r3, r4, r5, r6: competidor
+  fisc: fiscalizador
+comenzar
+  AsignarArea(r1, tramo1)
+  AsignarArea(r2, tramo2)
+  AsignarArea(r3, tramo3)
+  AsignarArea(r4, tramo4)
+  AsignarArea(r5, tramo5)
+  AsignarArea(r6, tramo6)
+  AsignarArea(fisc, esqFiscal)
+  Iniciar(r1, 1, 1)
+  Iniciar(r2, 2, 11)
+  Iniciar(r3, 3, 21)
+  Iniciar(r4, 4, 31)
+  Iniciar(r5, 5, 41)
+  Iniciar(r6, 6, 51)
+  Iniciar(fisc, 2, 1)
+fin

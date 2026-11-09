@@ -1,0 +1,169 @@
+programa P2ej3b
+{ ENUNCIADO - Practica 2, Ejercicio 3 b) y c) (2026):
+  b. Modifique el programa anterior para que cada equipo repita el
+     recorrido con las siguientes 20 esquinas de sus correspondientes calles.
+  c. Analice (no es necesario implementar) como implementaria el inciso b
+     si ahora cada equipo debe realizar 8 segmentos de 20 esquinas. }
+
+{ RESOLUCION b):
+  - Cada equipo hace 2 segmentos de 20 esquinas: el 1ro (avenidas 1..20) y
+    el 2do (avenidas 21..40). En cada segmento el inicial hace las primeras
+    10 y el final las otras 10.
+  - El testigo va y vuelve: A1 -> A2 -> A1 -> A2 -> fiscalizador. Asi
+    nunca hay dos robots del mismo equipo trabajando a la vez (solo esta
+    activo el que tiene el testigo), y el acumulado del equipo viaja en el
+    mensaje.
+  - Cada robot salta 20 avenidas para su tramo del segmento siguiente
+    (Pos mantiene la orientacion: sigue mirando al este).
+  - El robot recibe su id de equipo al principio: lo necesita para saber
+    de quien recibir y a quien enviar en todo el juego.
+  - Areas: cada robot tiene 2 AreaP (sus dos tramos). No hay bloqueos.
+
+  ANALISIS c) 8 segmentos de 20 esquinas:
+  - ATENCION: 8 x 20 = 160 esquinas, pero una calle tiene solo 100. Tal
+    como esta planteado, NO entra en la ciudad. Habria que aclarar el
+    enunciado (por ejemplo, que siga por otra calle) antes de implementarlo.
+  - Si el recorrido entrara, el codigo casi no cambia: el "repetir 1" de
+    cada robot pasa a ser "repetir 7" (los segmentos que siguen al primero).
+  - Areas: o se declaran 8 AreaP por robot (16 por equipo), o, mas simple,
+    UN AreaPC por equipo con toda su calle, asignada a sus 2 robots (2 de 5
+    robots -> parcialmente compartida). Con el testigo nunca estan los dos
+    en la calle trabajando a la vez y sus tramos no se pisan, asi que
+    tampoco haria falta bloquear. }
+procesos
+  proceso juntarPapeles(ES p: numero)
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      p := p + 1
+  fin
+  proceso tramo(ES p: numero)
+  { 10 esquinas hacia el este desde la esquina actual. }
+  comenzar
+    repetir 9
+      juntarPapeles(p)
+      mover
+    juntarPapeles(p)
+  fin
+  proceso asignarIds
+  comenzar
+    EnviarMensaje(1, a1)
+    EnviarMensaje(1, a2)
+    EnviarMensaje(2, b1)
+    EnviarMensaje(2, b2)
+  fin
+  proceso pasarAFinal(E id: numero; E p: numero)
+  comenzar
+    si (id = 1)
+      EnviarMensaje(p, a2)
+    sino
+      EnviarMensaje(p, b2)
+  fin
+  proceso esperarDeFinal(E id: numero; ES p: numero)
+  comenzar
+    si (id = 1)
+      RecibirMensaje(p, a2)
+    sino
+      RecibirMensaje(p, b2)
+  fin
+  proceso pasarAInicial(E id: numero; E p: numero)
+  comenzar
+    si (id = 1)
+      EnviarMensaje(p, a1)
+    sino
+      EnviarMensaje(p, b1)
+  fin
+  proceso esperarDeInicial(E id: numero; ES p: numero)
+  comenzar
+    si (id = 1)
+      RecibirMensaje(p, a1)
+    sino
+      RecibirMensaje(p, b1)
+  fin
+areas
+  tramoA1s1: AreaP(1,5,10,5)
+  tramoA2s1: AreaP(11,5,20,5)
+  tramoA1s2: AreaP(21,5,30,5)
+  tramoA2s2: AreaP(31,5,40,5)
+  tramoB1s1: AreaP(1,7,10,7)
+  tramoB2s1: AreaP(11,7,20,7)
+  tramoB1s2: AreaP(21,7,30,7)
+  tramoB2s2: AreaP(31,7,40,7)
+  esqFiscal: AreaP(1,1,1,1)
+robots
+  robot inicial
+  variables
+    id, p, av, ca: numero
+  comenzar
+    RecibirMensaje(id, fisc)
+    av := PosAv
+    ca := PosCa
+    p := 0
+    derecha
+    tramo(p)                    { segmento 1 }
+    pasarAFinal(id, p)
+    repetir 1                   { segmentos siguientes (c: repetir 7) }
+      esperarDeFinal(id, p)     { vuelve el testigo con el acumulado }
+      av := av + 20
+      Pos(av, ca)
+      tramo(p)
+      pasarAFinal(id, p)
+  fin
+  robot final
+  variables
+    id, p, av, ca: numero
+  comenzar
+    RecibirMensaje(id, fisc)
+    av := PosAv
+    ca := PosCa
+    derecha
+    esperarDeInicial(id, p)     { segmento 1 }
+    tramo(p)
+    repetir 1                   { segmentos siguientes (c: repetir 7) }
+      pasarAInicial(id, p)
+      esperarDeInicial(id, p)
+      av := av + 20
+      Pos(av, ca)
+      tramo(p)
+    EnviarMensaje(id, fisc)     { fin del juego: reporta el total del equipo }
+    EnviarMensaje(p, fisc)
+  fin
+  robot fiscalizador
+  variables
+    id, tA, tB: numero
+  comenzar
+    asignarIds
+    repetir 2
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(tA, a2)
+      sino
+        RecibirMensaje(tB, b2)
+    si (tA > tB)
+      Informar('GanoEquipoA', tA)
+    sino
+      si (tB > tA)
+        Informar('GanoEquipoB', tB)
+      sino
+        Informar('Empate', tA)
+  fin
+variables
+  a1, b1: inicial
+  a2, b2: final
+  fisc: fiscalizador
+comenzar
+  AsignarArea(a1, tramoA1s1)
+  AsignarArea(a1, tramoA1s2)
+  AsignarArea(a2, tramoA2s1)
+  AsignarArea(a2, tramoA2s2)
+  AsignarArea(b1, tramoB1s1)
+  AsignarArea(b1, tramoB1s2)
+  AsignarArea(b2, tramoB2s1)
+  AsignarArea(b2, tramoB2s2)
+  AsignarArea(fisc, esqFiscal)
+  Iniciar(a1, 1, 5)
+  Iniciar(a2, 11, 5)
+  Iniciar(b1, 1, 7)
+  Iniciar(b2, 11, 7)
+  Iniciar(fisc, 1, 1)
+fin

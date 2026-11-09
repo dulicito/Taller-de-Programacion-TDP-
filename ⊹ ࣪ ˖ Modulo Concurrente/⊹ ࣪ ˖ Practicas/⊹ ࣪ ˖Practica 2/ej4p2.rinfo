@@ -1,0 +1,166 @@
+programa P2ej4
+{ ENUNCIADO - Practica 2, Ejercicio 4 (2026):
+  Realice un programa en el que un robot fiscalizador controla el acceso de
+  4 robots recolectores al cuadrante encerrado entre las esquinas (25,25) y
+  (75,75). Para ello, el robot fiscalizador avisa a un robot recolector
+  aleatorio que puede ingresar al area. El robot que recibe la autorizacion
+  de acceso calcula una esquina aleatoria dentro del area, limpia dicha
+  esquina de flores y papeles, regresa a su esquina y avisa al robot
+  fiscalizador que ya finalizo.
+  Se realizaran en total 10 accesos al cuadrante entre los 4 robots
+  recolectores. Al finalizar, el robot fiscalizador debera indicar al robot
+  ganador (el que junto mas objetos en total) que se posicione en la
+  esquina (50,50).
+  El robot fiscalizador inicia en la esquina (1,1) y los robots recolectores
+  inician en las esquinas (25,1) (30,1) (35,1) y (40,1) respectivamente. }
+
+{ RESOLUCION (modelo: MASTER/SLAVE, el fiscalizador reparte los accesos):
+  - El fiscalizador sortea un numero 1..4, le envia V ("podes entrar") a
+    ese robot y ESPERA su aviso antes de dar el acceso siguiente. Asi,
+    dentro del cuadrante hay a lo sumo UN robot a la vez: el acceso ya esta
+    serializado por mensajes, por eso NO hace falta bloquear esquinas
+    (criterio confirmado por la autoevaluacion oficial AE3).
+  - El recolector avisa DESPUES de volver a su esquina (si avisara estando
+    en el cuadrante, el siguiente podria entrar y chocar: AE2).
+  - El aviso lleva la cantidad de objetos juntados; el fiscalizador la suma
+    al contador de ese robot. Recibe del robot NOMBRADO (el que autorizo),
+    que es el unico que puede estar respondiendo: no se fuerza ningun orden.
+  - Fin del juego: como el recolector no sabe cuantas veces lo van a
+    elegir, espera mensajes en un "mientras": V = entrar, F = terminar.
+    Despues de los 10 accesos el fiscalizador manda F a los 4.
+  - Ganador: el fiscalizador le manda V al ganador y F al resto. El
+    ganador va a (50,50); como ya termino todo, el cuadrante esta libre y
+    no hace falta bloquear. (En empate gana el de menor numero.)
+  - Areas: el cuadrante (25,25)-(75,75) lo usan los 4 recolectores pero no
+    el fiscalizador -> AreaPC. Cada esquina de inicio es privada (no estan
+    dentro del cuadrante porque estan en la calle 1). }
+procesos
+  proceso limpiarEsquina(ES cant: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cant := cant + 1
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      cant := cant + 1
+  fin
+  proceso enviarA(E id: numero; E valor: boolean)
+  { Envia "valor" al recolector numero "id". }
+  comenzar
+    si (id = 1)
+      EnviarMensaje(valor, r1)
+    sino
+      si (id = 2)
+        EnviarMensaje(valor, r2)
+      sino
+        si (id = 3)
+          EnviarMensaje(valor, r3)
+        sino
+          EnviarMensaje(valor, r4)
+  fin
+  proceso recibirDe(E id: numero; ES cant: numero)
+  comenzar
+    si (id = 1)
+      RecibirMensaje(cant, r1)
+    sino
+      si (id = 2)
+        RecibirMensaje(cant, r2)
+      sino
+        si (id = 3)
+          RecibirMensaje(cant, r3)
+        sino
+          RecibirMensaje(cant, r4)
+  fin
+areas
+  cuadrante: AreaPC(25,25,75,75)
+  esq1: AreaP(25,1,25,1)
+  esq2: AreaP(30,1,30,1)
+  esq3: AreaP(35,1,35,1)
+  esq4: AreaP(40,1,40,1)
+  esqFiscal: AreaP(1,1,1,1)
+robots
+  robot recolector
+  variables
+    avIni, caIni, av, ca, cant: numero
+    ok, gane: boolean
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    RecibirMensaje(ok, fisc)
+    mientras (ok)
+      cant := 0
+      Random(av, 25, 75)
+      Random(ca, 25, 75)
+      Pos(av, ca)
+      limpiarEsquina(cant)
+      Pos(avIni, caIni)
+      EnviarMensaje(cant, fisc)   { avisa recien cuando salio del cuadrante }
+      RecibirMensaje(ok, fisc)
+    RecibirMensaje(gane, fisc)
+    si (gane)
+      Pos(50, 50)
+  fin
+  robot fiscalizador
+  variables
+    id, cant, c1, c2, c3, c4, max, idMax, i: numero
+  comenzar
+    c1 := 0
+    c2 := 0
+    c3 := 0
+    c4 := 0
+    repetir 10
+      Random(id, 1, 4)
+      enviarA(id, V)            { autoriza el acceso }
+      recibirDe(id, cant)       { espera que ese robot termine y salga }
+      si (id = 1)
+        c1 := c1 + cant
+      sino
+        si (id = 2)
+          c2 := c2 + cant
+        sino
+          si (id = 3)
+            c3 := c3 + cant
+          sino
+            c4 := c4 + cant
+    i := 1
+    repetir 4                   { fin de los accesos para todos }
+      enviarA(i, F)
+      i := i + 1
+    max := c1
+    idMax := 1
+    si (c2 > max)
+      max := c2
+      idMax := 2
+    si (c3 > max)
+      max := c3
+      idMax := 3
+    si (c4 > max)
+      max := c4
+      idMax := 4
+    i := 1
+    repetir 4                   { V solo al ganador }
+      si (i = idMax)
+        enviarA(i, V)
+      sino
+        enviarA(i, F)
+      i := i + 1
+  fin
+variables
+  r1, r2, r3, r4: recolector
+  fisc: fiscalizador
+comenzar
+  AsignarArea(r1, cuadrante)
+  AsignarArea(r2, cuadrante)
+  AsignarArea(r3, cuadrante)
+  AsignarArea(r4, cuadrante)
+  AsignarArea(r1, esq1)
+  AsignarArea(r2, esq2)
+  AsignarArea(r3, esq3)
+  AsignarArea(r4, esq4)
+  AsignarArea(fisc, esqFiscal)
+  Iniciar(r1, 25, 1)
+  Iniciar(r2, 30, 1)
+  Iniciar(r3, 35, 1)
+  Iniciar(r4, 40, 1)
+  Iniciar(fisc, 1, 1)
+fin

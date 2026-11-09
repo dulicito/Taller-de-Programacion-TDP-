@@ -1,0 +1,132 @@
+programa P2ej1d
+{ ENUNCIADO - Practica 2, Ejercicio 1 d) y e) (2026):
+  d. Modifique el inciso anterior para que ahora el fiscalizador informe
+     tambien, cual fue el robot que junto la mayor cantidad de flores.
+  e. Analizar (no es necesario implementar): como se puede implementar el
+     inciso 1.c. sin robot fiscalizador?
+     -> que cantidad de robots participaran del juego?
+     -> que cantidad de mensajes deben enviarse? }
+
+{ RESOLUCION d):
+  - Para saber QUIEN mando cada cantidad, cada robot necesita un
+    identificador. Como los 6 son del mismo tipo, no lo pueden "saber"
+    solos: el fiscalizador se los asigna al principio (EnviarMensaje(1, r1),
+    EnviarMensaje(2, r2), ...).
+  - Cada competidor envia su id y despues su cantidad.
+  - Patron oficial "ID + dato": el fiscalizador recibe el id con * y la
+    cantidad la recibe DE ESE ROBOT (proceso recibirDe). Nunca dos * seguidos:
+    el segundo mensaje podria ser de otro robot.
+  - Los competidores reciben su id DESPUES de juntar (lo necesitan recien para
+    reportar), asi no esperan al fiscalizador para empezar a trabajar.
+
+  ANALISIS e) Sin fiscalizador:
+  - Participan los 6 robots competidores (uno menos que en 1.c).
+  - Cada robot tiene que conocer la cantidad de todos los demas para saber
+    si es el maximo: cada uno ENVIA su cantidad a los otros 5 y RECIBE 5.
+    Total: 6 x 5 = 30 mensajes (contra 6 con fiscalizador).
+  - El que compruebe que su cantidad es >= que todas las recibidas informa
+    el maximo. Para desempatar (que informe uno solo) hace falta un criterio,
+    por ejemplo que en empate informe el de menor numero, y para eso cada
+    robot debe conocer su id y el de quien le envia (mas mensajes: id + dato).
+  - Ademas, cada robot tiene que nombrar a los otros 5 en el codigo: con un
+    solo tipo, eso se resuelve con el id y un si por cada destino.
+  Conclusion: se puede, pero se necesitan muchos mas mensajes y un codigo mas
+  complejo; el fiscalizador centraliza la comparacion. }
+procesos
+  proceso juntarFlores(ES f: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      f := f + 1
+  fin
+  proceso juntarTramo(ES f: numero)
+  comenzar
+    repetir 9
+      juntarFlores(f)
+      mover
+    juntarFlores(f)
+  fin
+  proceso asignarIds
+  { Le envia a cada competidor su numero. }
+  comenzar
+    EnviarMensaje(1, r1)
+    EnviarMensaje(2, r2)
+    EnviarMensaje(3, r3)
+    EnviarMensaje(4, r4)
+    EnviarMensaje(5, r5)
+    EnviarMensaje(6, r6)
+  fin
+  proceso recibirDe(E id: numero; ES f: numero)
+  { Recibe la cantidad del robot cuyo id ya se recibio. }
+  comenzar
+    si (id = 1)
+      RecibirMensaje(f, r1)
+    sino
+      si (id = 2)
+        RecibirMensaje(f, r2)
+      sino
+        si (id = 3)
+          RecibirMensaje(f, r3)
+        sino
+          si (id = 4)
+            RecibirMensaje(f, r4)
+          sino
+            si (id = 5)
+              RecibirMensaje(f, r5)
+            sino
+              RecibirMensaje(f, r6)
+  fin
+areas
+  tramo1: AreaP(1,1,1,10)
+  tramo2: AreaP(2,11,2,20)
+  tramo3: AreaP(3,21,3,30)
+  tramo4: AreaP(4,31,4,40)
+  tramo5: AreaP(5,41,5,50)
+  tramo6: AreaP(6,51,6,60)
+  esqFiscal: AreaP(2,1,2,1)
+robots
+  robot competidor
+  variables
+    id, f: numero
+  comenzar
+    f := 0
+    juntarTramo(f)
+    RecibirMensaje(id, fisc)
+    EnviarMensaje(id, fisc)
+    EnviarMensaje(f, fisc)
+  fin
+  robot fiscalizador
+  variables
+    id, f, max, idMax: numero
+  comenzar
+    asignarIds
+    max := -1
+    idMax := 0
+    repetir 6
+      RecibirMensaje(id, *)
+      recibirDe(id, f)
+      si (f > max)
+        max := f
+        idMax := id
+    Informar('RobotGanador', idMax)
+    Informar('MaximoFlores', max)
+  fin
+variables
+  r1, r2, r3, r4, r5, r6: competidor
+  fisc: fiscalizador
+comenzar
+  AsignarArea(r1, tramo1)
+  AsignarArea(r2, tramo2)
+  AsignarArea(r3, tramo3)
+  AsignarArea(r4, tramo4)
+  AsignarArea(r5, tramo5)
+  AsignarArea(r6, tramo6)
+  AsignarArea(fisc, esqFiscal)
+  Iniciar(r1, 1, 1)
+  Iniciar(r2, 2, 11)
+  Iniciar(r3, 3, 21)
+  Iniciar(r4, 4, 31)
+  Iniciar(r5, 5, 41)
+  Iniciar(r6, 6, 51)
+  Iniciar(fisc, 2, 1)
+fin
