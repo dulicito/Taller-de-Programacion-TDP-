@@ -1,0 +1,58 @@
+programa P1ej1
+{ ENUNCIADO - Practica 1, Ejercicio 1 (2026):
+  Realice un programa para que un robot junte todas las flores de la avenida 1
+  y las deposite al final de dicha avenida. Al finalizar, debe informar la
+  cantidad de flores depositadas y la cantidad de esquinas sin flores que
+  encontro durante el recorrido. }
+
+{ RESOLUCION:
+  - Un solo robot, sin comunicacion ni recursos compartidos.
+  - Area privada exacta del recorrido: la avenida 1 completa (calles 1 a 100).
+  - El robot arranca en (1,1) mirando al norte (Iniciar siempre orienta al norte). }
+procesos
+  proceso procesarEsquina(ES flores: numero; ES vacias: numero)
+  { Junta todas las flores de la esquina actual sumandolas a "flores".
+    Si la esquina no tenia flores, suma 1 a "vacias". }
+  comenzar
+    si (HayFlorEnLaEsquina)
+      mientras (HayFlorEnLaEsquina)
+        tomarFlor
+        flores := flores + 1
+    sino
+      vacias := vacias + 1
+  fin
+  proceso recorrerAvenida(ES flores: numero; ES vacias: numero)
+  { Recorre las 100 esquinas: procesa y avanza 99 veces, y procesa la ultima
+    (calle 100) fuera del repetir para no salirse de la ciudad. }
+  comenzar
+    repetir 99
+      procesarEsquina(flores, vacias)
+      mover
+    procesarEsquina(flores, vacias)
+  fin
+  proceso depositarFlores(E cant: numero)
+  { Deposita "cant" flores en la esquina actual. }
+  comenzar
+    repetir cant
+      depositarFlor
+  fin
+areas
+  avenida1: AreaP(1,1,1,100)
+robots
+  robot florero
+  variables
+    flores, vacias: numero
+  comenzar
+    flores := 0
+    vacias := 0
+    recorrerAvenida(flores, vacias)
+    depositarFlores(flores)        { ya esta en (1,100): el final de la avenida }
+    Informar('FloresDepositadas', flores)
+    Informar('EsquinasSinFlores', vacias)
+  fin
+variables
+  r1: florero
+comenzar
+  AsignarArea(r1, avenida1)
+  Iniciar(r1, 1, 1)
+fin

@@ -1,0 +1,129 @@
+programa P1ej5
+{ ENUNCIADO - Practica 1, Ejercicio 5 (2026):
+  Realice un programa en el que cuatro robots realizan las siguientes
+  actividades:
+  - El robot 1 debe limpiar de flores las primeras 15 esquinas de las
+    calles 75 y 80. Al finalizar cada calle, debe depositar todas las
+    flores en la ultima esquina.
+  - El robot 2 debe limpiar de papeles las ultimas 20 esquinas de las
+    avenidas 75 y 80. Al finalizar cada avenida debe depositar todos los
+    papeles en la primera esquina.
+  - El robot 3 debe limpiar de flores las ultimas 15 esquinas de las
+    calles 10 y 15. Al finalizar cada calle, debe depositar todas las
+    flores en la ultima esquina.
+  - El robot 4 debe limpiar de papeles las primeras 20 esquinas de las
+    avenidas 10 y 15. Al finalizar cada avenida debe depositar todos los
+    papeles en la primera esquina.
+  (Figura: robot 1 en (1,75) y (1,80); robot 2 en (75,81) y (80,81);
+   robot 3 en (86,10) y (86,15); robot 4 en (10,1) y (15,1).) }
+
+{ RESOLUCION:
+  Tramos exactos:
+    Robot 1: calles 75 y 80, avenidas 1..15   -> deposita en (15,75) y (15,80)
+    Robot 2: avenidas 75 y 80, calles 81..100 -> deposita en (75,81) y (80,81)
+    Robot 3: calles 10 y 15, avenidas 86..100 -> deposita en (100,10) y (100,15)
+    Robot 4: avenidas 10 y 15, calles 1..20   -> deposita en (10,1) y (15,1)
+  (Ultimas 15 de 100 = 86..100; ultimas 20 de 100 = 81..100.)
+
+  - TIPOS: el robot 1 y el 3 hacen la MISMA tarea (2 calles de 15
+    esquinas juntando flores, la 2da calle esta 5 calles mas arriba) y
+    solo cambia donde empiezan: 1 tipo "florero". Lo mismo el 2 y el 4
+    (2 avenidas de 20 esquinas, la 2da 5 avenidas a la derecha): 1 tipo
+    "papelero". Total: 2 tipos y 4 robots.
+  - AREAS: 8 tramos que no se cruzan (las calles 75/80 llegan solo hasta
+    la avenida 15 y las avenidas 10/15 solo hasta la calle 20, etc.).
+    Cada tramo es un AreaP de su robot. No hay colisiones: no se bloquea.
+  - Se deposita la cantidad contada (no "lo que haya en la bolsa"), asi se
+    deja exactamente lo juntado en ESE tramo. }
+procesos
+  proceso juntarFlores(ES cant: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cant := cant + 1
+  fin
+  proceso juntarPapeles(ES cant: numero)
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      cant := cant + 1
+  fin
+  proceso tramoFlores(E largo: numero)
+  { Recorre "largo" esquinas juntando flores y las deposita en la ULTIMA. }
+  variables
+    f: numero
+  comenzar
+    f := 0
+    repetir largo - 1
+      juntarFlores(f)
+      mover
+    juntarFlores(f)
+    repetir f
+      depositarFlor
+  fin
+  proceso tramoPapeles(E largo: numero)
+  { Recorre "largo" esquinas juntando papeles, vuelve a la PRIMERA y los deposita. }
+  variables
+    p, avIni, caIni: numero
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    p := 0
+    repetir largo - 1
+      juntarPapeles(p)
+      mover
+    juntarPapeles(p)
+    Pos(avIni, caIni)
+    repetir p
+      depositarPapel
+  fin
+areas
+  r1calle75: AreaP(1,75,15,75)
+  r1calle80: AreaP(1,80,15,80)
+  r2av75: AreaP(75,81,75,100)
+  r2av80: AreaP(80,81,80,100)
+  r3calle10: AreaP(86,10,100,10)
+  r3calle15: AreaP(86,15,100,15)
+  r4av10: AreaP(10,1,10,20)
+  r4av15: AreaP(15,1,15,20)
+robots
+  robot florero
+  { Arranca al inicio de su primera calle; la segunda esta 5 calles arriba. }
+  variables
+    avIni, caIni: numero
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    derecha                      { mira al este para recorrer calles }
+    tramoFlores(15)
+    Pos(avIni, caIni + 5)
+    tramoFlores(15)
+  fin
+  robot papelero
+  { Arranca al inicio de su primera avenida; la segunda esta 5 avenidas a la derecha. }
+  variables
+    avIni, caIni: numero
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    tramoPapeles(20)             { ya mira al norte }
+    Pos(avIni + 5, caIni)
+    tramoPapeles(20)
+  fin
+variables
+  robot1, robot3: florero
+  robot2, robot4: papelero
+comenzar
+  AsignarArea(robot1, r1calle75)
+  AsignarArea(robot1, r1calle80)
+  AsignarArea(robot2, r2av75)
+  AsignarArea(robot2, r2av80)
+  AsignarArea(robot3, r3calle10)
+  AsignarArea(robot3, r3calle15)
+  AsignarArea(robot4, r4av10)
+  AsignarArea(robot4, r4av15)
+  Iniciar(robot1, 1, 75)
+  Iniciar(robot2, 75, 81)
+  Iniciar(robot3, 86, 10)
+  Iniciar(robot4, 10, 1)
+fin

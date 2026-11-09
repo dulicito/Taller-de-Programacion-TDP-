@@ -1,0 +1,123 @@
+programa P1ej2
+{ ENUNCIADO - Practica 1, Ejercicio 2 (2026):
+  Realice un programa en el que 4 robots limpien de papeles el perimetro de
+  un cuadrado de lado 20 en sentido horario, como se muestra en la figura
+  (Robot1 abajo a la izquierda subiendo, Robot2 arriba a la izquierda yendo
+  a la derecha, Robot3 arriba a la derecha bajando, Robot4 abajo a la
+  derecha yendo a la izquierda).
+  El vertice inferior izquierdo del cuadrado se ubica en la esquina (10,10).
+  Al finalizar, Robot1 debe informar la cantidad de esquinas que tienen solo
+  flores, Robot2 informar la cantidad de esquinas que tienen solo papeles,
+  Robot3 informar la cantidad de esquinas que tienen flores y los papeles y
+  Robot 4 informar la cantidad de esquinas vacias.
+  Al realizar este programa, analizar:
+  a) Cuantos tipos de robots se deben definir?
+  b) Como deben declararse la o las areas?
+  c) Existe riesgo de colision? }
+
+{ RESOLUCION:
+  Vertices: (10,10), (10,30), (30,30), (30,10). Cada lado tiene 20 esquinas
+  propias: cada robot procesa desde su vertice hasta la esquina ANTERIOR al
+  vertice siguiente (que es el inicio del otro robot).
+    Robot1: (10,10)..(10,29) hacia el norte
+    Robot2: (10,30)..(29,30) hacia el este
+    Robot3: (30,30)..(30,11) hacia el sur
+    Robot4: (30,10)..(11,10) hacia el oeste
+
+  a) Se definen 4 TIPOS de robot, porque cada uno hace una tarea distinta:
+     se orienta distinto e informa algo distinto (regla de la catedra:
+     tarea distinta -> tipo distinto). Para no repetir codigo, el recorrido
+     se escribe UNA vez en el proceso recorrerLado, que recibe un "criterio"
+     (1..4) que indica que tipo de esquina contar.
+     (Alternativa valida: 1 solo tipo que decide su criterio segun PosAv y
+     PosCa iniciales, pero es menos claro.)
+  b) 4 areas PRIVADAS, una por lado y sin superponerse: cada lado lo
+     recorre un unico robot.
+  c) NO hay riesgo de colision: ningun robot pisa una esquina del lado de
+     otro (los vertices de inicio solo los usa su duenio). Por eso no se
+     bloquea ninguna esquina.
+
+  IMPORTANTE: la esquina se CLASIFICA antes de limpiarla, porque despues de
+  tomar los papeles ya no se podria saber si tenia papeles. }
+procesos
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  proceso clasificarYLimpiar(E criterio: numero; ES cant: numero)
+  { Mira la esquina, la cuenta si cumple el criterio y despues junta los papeles.
+    criterio 1: solo flores | 2: solo papeles | 3: flores y papeles | 4: vacia }
+  variables
+    hayF, hayP: boolean
+  comenzar
+    hayF := F
+    hayP := F
+    si (HayFlorEnLaEsquina)
+      hayF := V
+    si (HayPapelEnLaEsquina)
+      hayP := V
+    si ((criterio = 1) & (hayF & ~(hayP)))
+      cant := cant + 1
+    si ((criterio = 2) & (~(hayF) & hayP))
+      cant := cant + 1
+    si ((criterio = 3) & (hayF & hayP))
+      cant := cant + 1
+    si ((criterio = 4) & (~(hayF) & ~(hayP)))
+      cant := cant + 1
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+  fin
+  proceso recorrerLado(E criterio: numero)
+  { Recorre las 20 esquinas del lado (19 mover) e informa el resultado. }
+  variables
+    cant: numero
+  comenzar
+    cant := 0
+    repetir 19
+      clasificarYLimpiar(criterio, cant)
+      mover
+    clasificarYLimpiar(criterio, cant)
+    Informar(cant)
+  fin
+areas
+  lado1: AreaP(10,10,10,29)
+  lado2: AreaP(10,30,29,30)
+  lado3: AreaP(30,11,30,30)
+  lado4: AreaP(11,10,30,10)
+robots
+  robot tipo1
+  comenzar
+    recorrerLado(1)          { ya mira al norte }
+  fin
+  robot tipo2
+  comenzar
+    derecha                  { este }
+    recorrerLado(2)
+  fin
+  robot tipo3
+  comenzar
+    repetir 2                { sur }
+      derecha
+    recorrerLado(3)
+  fin
+  robot tipo4
+  comenzar
+    izquierda                { oeste }
+    recorrerLado(4)
+  fin
+variables
+  robot1: tipo1
+  robot2: tipo2
+  robot3: tipo3
+  robot4: tipo4
+comenzar
+  AsignarArea(robot1, lado1)
+  AsignarArea(robot2, lado2)
+  AsignarArea(robot3, lado3)
+  AsignarArea(robot4, lado4)
+  Iniciar(robot1, 10, 10)
+  Iniciar(robot2, 10, 30)
+  Iniciar(robot3, 30, 30)
+  Iniciar(robot4, 30, 10)
+fin

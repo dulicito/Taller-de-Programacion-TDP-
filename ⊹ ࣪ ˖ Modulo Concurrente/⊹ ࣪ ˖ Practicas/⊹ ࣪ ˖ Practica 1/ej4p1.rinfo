@@ -1,0 +1,110 @@
+programa P1ej4
+{ ENUNCIADO - Practica 1, Ejercicio 4 (2026):
+  Realice un programa en el que dos robots se encargan de limpiar la ciudad.
+  La ciudad se dividio en 4 areas: las impares (1 y 3) deben limpiarse de
+  flores; y las pares (2 y 4) deben limpiarse de papeles. Un robot debe
+  encargarse de las areas impares y otro robot de las pares. Modularice el
+  recorrido de cada area.
+  - Area 1: desde la avenida 1 hasta la avenida 25
+  - Area 2: desde la avenida 26 hasta la avenida 50
+  - Area 3: desde la avenida 51 hasta la avenida 75
+  - Area 4: desde la avenida 76 hasta la avenida 100
+  a) Analizar (no es necesario implementar) que se deberia modificar si
+     ahora se pide que la ciudad se divida en 20 areas:
+     Area 1: Avenidas 1 a 5, Area 2: Avenidas 6 a 10, ...,
+     Area 19: Avenidas 91 a 95, Area 20: Avenidas 96 a 100 }
+
+{ RESOLUCION:
+  - 2 tipos de robot (uno limpia flores y el otro papeles: tareas distintas).
+  - 4 areas PRIVADAS: el robot de flores tiene asignadas la 1 y la 3, y el
+    de papeles la 2 y la 4. Ningun area es usada por dos robots, asi que
+    no hay colisiones posibles y no se bloquea nada.
+  - Modularizacion: el recorrido de un area se escribe una sola vez y
+    recibe la avenida inicial como parametro, asi sirve para el area 1 y
+    la 3 (o la 2 y la 4) sin repetir codigo. Pos(av,1) mantiene al robot
+    mirando al norte para recorrer cada avenida.
+
+  a) ANALISIS con 20 areas de 5 avenidas:
+     - Hay que declarar 20 areas privadas (AreaP de 5 avenidas cada una) y
+       asignar las 10 impares a un robot y las 10 pares al otro
+       (20 AsignarArea).
+     - El proceso de recorrido de area deberia recibir tambien el ANCHO
+       (5 en vez de 25), o tener una constante distinta.
+     - En el robot, en lugar de llamar 2 veces al proceso, se llama
+       10 veces dentro de un repetir 10, sumando 10 a la avenida inicial
+       en cada vuelta (impares: 1, 11, 21, ..., 91; pares: 6, 16, ..., 96).
+     - Los robots, los tipos y la logica de limpieza no cambian. }
+procesos
+  proceso limpiarEsquinaFlores
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+  fin
+  proceso limpiarEsquinaPapeles
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+  fin
+  proceso avenidaFlores
+  { Limpia de flores la avenida actual, de la calle 1 a la 100. }
+  comenzar
+    repetir 99
+      limpiarEsquinaFlores
+      mover
+    limpiarEsquinaFlores
+  fin
+  proceso avenidaPapeles
+  comenzar
+    repetir 99
+      limpiarEsquinaPapeles
+      mover
+    limpiarEsquinaPapeles
+  fin
+  proceso areaFlores(E avIni: numero)
+  { Recorre las 25 avenidas de un area impar empezando en avIni. }
+  variables
+    av: numero
+  comenzar
+    av := avIni
+    repetir 25
+      Pos(av, 1)
+      avenidaFlores
+      av := av + 1
+  fin
+  proceso areaPapeles(E avIni: numero)
+  variables
+    av: numero
+  comenzar
+    av := avIni
+    repetir 25
+      Pos(av, 1)
+      avenidaPapeles
+      av := av + 1
+  fin
+areas
+  area1: AreaP(1,1,25,100)
+  area2: AreaP(26,1,50,100)
+  area3: AreaP(51,1,75,100)
+  area4: AreaP(76,1,100,100)
+robots
+  robot limpiadorFlores
+  comenzar
+    areaFlores(1)
+    areaFlores(51)
+  fin
+  robot limpiadorPapeles
+  comenzar
+    areaPapeles(26)
+    areaPapeles(76)
+  fin
+variables
+  rImpar: limpiadorFlores
+  rPar: limpiadorPapeles
+comenzar
+  AsignarArea(rImpar, area1)
+  AsignarArea(rImpar, area3)
+  AsignarArea(rPar, area2)
+  AsignarArea(rPar, area4)
+  Iniciar(rImpar, 1, 1)
+  Iniciar(rPar, 26, 1)
+fin

@@ -1,0 +1,99 @@
+programa P1ej3
+{ ENUNCIADO - Practica 1, Ejercicio 3 (2026):
+  Realice un programa en el que 3 robots realicen escaleras de 4 escalones.
+  El tamanio de cada escalon se incrementa en un 1 respecto al escalon
+  anterior. El primer escalon sera de 1x1, el segundo de 2x2, y asi
+  sucesivamente (la figura muestra tres escaleras que arrancan en la
+  calle 14, en las avenidas 2, 11 y 21).
+  Al finalizar el recorrido, cada robot debe informar la cantidad de
+  escalones en los que la cantidad de papeles supero en 1 a la cantidad de
+  flores. Las esquinas deben quedar sin modificar. }
+
+{ RESOLUCION:
+  - Los 3 robots hacen la misma tarea: 1 tipo y 3 variables.
+  - Escalon de tamanio i: sube i esquinas y avanza i esquinas a la derecha.
+    Se cuentan las 2i esquinas que se recorren antes de llegar al inicio del
+    escalon siguiente; la esquina final de la escalera se suma al escalon 4.
+  - "Sin modificar": se toman las flores y papeles para contarlos y se
+    vuelven a depositar en la misma esquina.
+  - AREAS: cada escalera ocupa 10 avenidas x 10 calles. Las cajas de las
+    escaleras se superponen (por ejemplo, la 1ra llega hasta la av. 12 y la
+    2da empieza en la av. 11), pero SUS RECORRIDOS NO COMPARTEN ESQUINAS.
+    No se pueden declarar areas privadas rectangulares sin superponerlas,
+    asi que se usa UNA AreaC asignada a los 3 robots (que son todos los
+    del programa). No hay que bloquear: ninguna esquina es visitada por
+    dos robots. }
+procesos
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  proceso contarEsquina(ES flores: numero; ES papeles: numero)
+  { Cuenta flores y papeles de la esquina y la deja como estaba. }
+  variables
+    f, p: numero
+  comenzar
+    f := 0
+    p := 0
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      f := f + 1
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      p := p + 1
+    repetir f
+      depositarFlor
+    repetir p
+      depositarPapel
+    flores := flores + f
+    papeles := papeles + p
+  fin
+  proceso escalon(E tam: numero; ES flores: numero; ES papeles: numero)
+  { Sube "tam" esquinas, gira a la derecha y avanza "tam"; queda mirando al norte. }
+  comenzar
+    repetir tam
+      contarEsquina(flores, papeles)
+      mover
+    derecha
+    repetir tam
+      contarEsquina(flores, papeles)
+      mover
+    izquierda
+  fin
+  proceso escalera(ES cant: numero)
+  variables
+    tam, flores, papeles: numero
+  comenzar
+    tam := 1
+    repetir 4
+      flores := 0
+      papeles := 0
+      escalon(tam, flores, papeles)
+      si (tam = 4)
+        contarEsquina(flores, papeles)   { esquina final de la escalera }
+      si (papeles = flores + 1)
+        cant := cant + 1
+      tam := tam + 1
+  fin
+areas
+  escaleras: AreaC(2,14,31,24)
+robots
+  robot escalador
+  variables
+    cant: numero
+  comenzar
+    cant := 0
+    escalera(cant)
+    Informar('EscalonesPapelesMasUno', cant)
+  fin
+variables
+  r1, r2, r3: escalador
+comenzar
+  AsignarArea(r1, escaleras)
+  AsignarArea(r2, escaleras)
+  AsignarArea(r3, escaleras)
+  Iniciar(r1, 2, 14)
+  Iniciar(r2, 11, 14)
+  Iniciar(r3, 21, 14)
+fin
