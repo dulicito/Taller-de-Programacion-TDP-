@@ -1,0 +1,187 @@
+programa P3ej6a
+{ ENUNCIADO - Practica 3, Ejercicio 6 (2026):
+  6.a- Dos robots recolectores deben recorrer el perimetro de su cuadrante,
+  como se indica a continuacion:
+  - El robot 1 comienza la esquina (2,2) y debe realizar un cuadrante de
+    6x6 juntando todas las flores que encuentre
+  - El robot 2 comienza en la esquina (5,5) y debe realizar un cuadrante de
+    10x10 juntando todas las flores y los papeles que encuentre
+  Cuando un robot finaliza su cuadrante debera avisar a un robot
+  fiscalizador. Al recibir el aviso, el fiscalizador indicara inmediatamente
+  una calle a la que debera dirigirse el robot recolector, considerando que
+  el robot que finalizo primero ira a la calle 20, el segundo a la 21.
+  Cuando los robots recolectores reciben un numero de calle, deberan
+  posicionarse en la avenida 1 de dicha calle y recorrerla depositando en
+  cada esquina una flor o ambos, segun lo que cada robot haya juntado. Este
+  recorrido finalizara al completar la calle o al quedarse sin elementos
+  para depositar.
+  6.b Indique que deberia modificar si se pide que el fiscalizador informe
+  que robot termino primero
+  6.c Analice (no es necesario implementar): como deberia modificarse el
+  ejercicio anterior si los robots recolectores no conocen de antemano el
+  tamanio de su cuadrante (por ejemplo, porque lo calcula el fiscalizador
+  de manera aleatoria)? }
+
+{ RESOLUCION 6.a:
+  - Cuadrante de 6x6 = lado de 6 cuadras: robot 1 recorre el perimetro de
+    (2,2) a (8,8); robot 2, de (5,5) a (15,15). Ambos en sentido horario.
+  - LOS PERIMETROS SE CRUZAN en dos esquinas:
+    (5,8): calle 8 del robot 1 con avenida 5 del robot 2.
+    (8,5): avenida 8 del robot 1 con calle 5 del robot 2.
+    Solo esas dos esquinas se bloquean, y el recorrido se parte en tramos
+    (sin conflicto / cruce / sin conflicto), como indica la teoria oficial,
+    en vez de preguntar en cada esquina. El robot bloquea ANTES de entrar al
+    cruce y libera DESPUES de salir a la esquina siguiente.
+  - Aviso: cada robot conoce su numero por su tipo y se lo manda al
+    fiscalizador. El fiscalizador recibe con *: el primero que llega va a
+    la calle 20 y el segundo a la 21. Responde inmediatamente a cada uno.
+  - Deposito en la calle: el robot 1 deja una flor por esquina; el robot 2
+    deja una flor y un papel por esquina mientras tenga (si se queda sin
+    uno de los dos, sigue con el que le quede). Termina al llegar a la
+    avenida 100 o cuando la bolsa queda vacia.
+  - AREAS: los dos cuadrantes se superponen, asi que no pueden ser dos
+    areas privadas rectangulares. Se usa un AreaPC (2,2)-(15,15) para los 2
+    recolectores (el fiscalizador no la usa). Las calles 20 y 21 tambien
+    son un AreaPC: no se sabe de antemano a que calle ira cada uno. No
+    hace falta bloquear en las calles: cada robot recibe una calle distinta.
+    (Alternativa mas precisa: un AreaP por cada tramo de cada perimetro y
+    un AreaPC solo para los dos cruces; es correcta pero mucho mas larga.)
+  - SUPUESTO: el enunciado no da la esquina del fiscalizador; se ubica en
+    (1,1).
+
+  RESPUESTA 6.b: casi nada. El fiscalizador ya sabe quien termino primero:
+  es el id del PRIMER RecibirMensaje(id, *). Alcanza con agregar
+  Informar('TerminoPrimero', id) despues de esa recepcion.
+
+  RESPUESTA 6.c: si el tamanio lo calcula el fiscalizador:
+  - Cada robot tiene que RECIBIR su tamanio antes de empezar (mensaje del
+    fiscalizador), y los procesos de recorrido pasan a usar ese valor.
+  - Los cruces dejan de ser fijos: dependen de los dos tamanios. Se podria
+    mandar a cada robot tambien el tamanio del otro para que calcule donde
+    se cruzan, o bien bloquear toda esquina de su perimetro que pueda
+    pertenecer al cuadrante del otro (es mas simple, pero bloquea mas y
+    reduce la concurrencia). Puede pasar incluso que no se crucen.
+  - Las areas se declaran para el PEOR CASO (el tamanio maximo posible). }
+procesos
+  proceso juntar(E tipo: numero; ES f: numero; ES p: numero)
+  { tipo 1: solo flores | tipo 2: flores y papeles }
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      f := f + 1
+    si (tipo = 2)
+      mientras (HayPapelEnLaEsquina)
+        tomarPapel
+        p := p + 1
+  fin
+  proceso ladoLibre(E n: numero; E tipo: numero; ES f: numero; ES p: numero)
+  { n pasos sin conflicto, juntando en cada esquina antes de moverse. }
+  comenzar
+    repetir n
+      juntar(tipo, f, p)
+      mover
+  fin
+  proceso ladoConCruce(E antes: numero; E despues: numero; E avC: numero; E caC: numero; E tipo: numero; ES f: numero; ES p: numero)
+  { Lado con una esquina de cruce: tramo libre, cruce protegido, tramo libre. }
+  comenzar
+    ladoLibre(antes, tipo, f, p)
+    juntar(tipo, f, p)          { esquina anterior al cruce }
+    BloquearEsquina(avC, caC)
+    mover                       { entra al cruce }
+    juntar(tipo, f, p)
+    mover                       { sale a una esquina segura }
+    LiberarEsquina(avC, caC)
+    ladoLibre(despues, tipo, f, p)
+  fin
+  proceso depositarEnCalle(E tipo: numero)
+  { Recorre la calle desde la avenida 1 dejando una flor (y un papel si es
+    tipo 2) por esquina, hasta la avenida 100 o hasta quedarse sin nada. }
+  variables
+    seguir: boolean
+  comenzar
+    seguir := V
+    mientras (seguir)
+      si (HayFlorEnLaBolsa)
+        depositarFlor
+      si (tipo = 2)
+        si (HayPapelEnLaBolsa)
+          depositarPapel
+      si ((PosAv < 100) & (HayFlorEnLaBolsa | HayPapelEnLaBolsa))
+        mover
+      sino
+        seguir := F
+  fin
+areas
+  cuadrantes: AreaPC(2,2,15,15)
+  calles: AreaPC(1,20,100,21)
+  esqFiscal: AreaP(1,1,1,1)
+robots
+  robot recolector1
+  { Perimetro (2,2)-(8,8), solo flores. Cruces: (5,8) y (8,5). }
+  variables
+    f, p, calle: numero
+  comenzar
+    f := 0
+    p := 0
+    ladoLibre(6, 1, f, p)                 { avenida 2 hacia el norte }
+    derecha
+    ladoConCruce(2, 2, 5, 8, 1, f, p)     { calle 8 hacia el este }
+    derecha
+    ladoConCruce(2, 2, 8, 5, 1, f, p)     { avenida 8 hacia el sur }
+    derecha
+    ladoLibre(6, 1, f, p)                 { calle 2 hacia el oeste }
+    EnviarMensaje(1, fisc)
+    RecibirMensaje(calle, fisc)
+    repetir 2                             { de oeste a este }
+      derecha
+    Pos(1, calle)
+    depositarEnCalle(1)
+  fin
+  robot recolector2
+  { Perimetro (5,5)-(15,15), flores y papeles. Cruces: (5,8) y (8,5). }
+  variables
+    f, p, calle: numero
+  comenzar
+    f := 0
+    p := 0
+    ladoConCruce(2, 6, 5, 8, 2, f, p)     { avenida 5 hacia el norte }
+    derecha
+    ladoLibre(10, 2, f, p)                { calle 15 hacia el este }
+    derecha
+    ladoLibre(10, 2, f, p)                { avenida 15 hacia el sur }
+    derecha
+    ladoConCruce(6, 2, 8, 5, 2, f, p)     { calle 5 hacia el oeste }
+    EnviarMensaje(2, fisc)
+    RecibirMensaje(calle, fisc)
+    repetir 2
+      derecha
+    Pos(1, calle)
+    depositarEnCalle(2)
+  fin
+  robot fiscalizador
+  variables
+    id, calle: numero
+  comenzar
+    calle := 20
+    repetir 2
+      RecibirMensaje(id, *)               { orden de llegada de los avisos }
+      si (id = 1)
+        EnviarMensaje(calle, r1)          { responde inmediatamente }
+      sino
+        EnviarMensaje(calle, r2)
+      calle := calle + 1
+  fin
+variables
+  r1: recolector1
+  r2: recolector2
+  fisc: fiscalizador
+comenzar
+  AsignarArea(r1, cuadrantes)
+  AsignarArea(r2, cuadrantes)
+  AsignarArea(r1, calles)
+  AsignarArea(r2, calles)
+  AsignarArea(fisc, esqFiscal)
+  Iniciar(r1, 2, 2)
+  Iniciar(r2, 5, 5)
+  Iniciar(fisc, 1, 1)
+fin

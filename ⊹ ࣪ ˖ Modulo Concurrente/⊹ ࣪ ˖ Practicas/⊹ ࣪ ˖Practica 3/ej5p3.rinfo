@@ -1,0 +1,127 @@
+programa P3ej5
+{ ENUNCIADO - Practica 3, Ejercicio 5 (2026):
+  Realice un programa en el que 4 robots juegan una carrera por avenidas
+  diferentes: 4, 6, 8 y 10 respectivamente. Todos los robots inician en la
+  calle 1.
+  Para poder avanzar, cada robot debe juntar un papel de una fuente de
+  papeles localizada en la esquina (11,11), colocarlo en la esquina actual
+  de su avenida y avanzar un paso. Cuando la esquina fuente ya no tiene mas
+  papeles, o cuando se haya completado la avenida, deberan avisar al robot
+  coordinador y este informara quien es el robot ganador considerando el
+  que llego mas lejos. Si hay empate, el ganador es el del aviso que haya
+  llegado antes. }
+
+{ RESOLUCION:
+  - Cada paso: bloquear la fuente (11,11), ir, tomar UN papel si hay,
+    volver a su esquina actual de la avenida y liberar. Si consiguio papel,
+    lo deposita en su esquina y avanza; si no, termino.
+  - La avenida se completa al colocar el papel en la calle 100: ahi ya no
+    puede avanzar, asi que tambien termina.
+  - Aviso al coordinador: id + calle alcanzada (PosCa). El coordinador usa
+    el patron ID + dato y se queda con el MAYOR estricto: ante un empate se
+    queda el que ya tenia, que es el del aviso que llego antes (exactamente
+    lo que pide el enunciado).
+  - SUPUESTO: el enunciado no dice donde inicia el coordinador; se ubica en
+    (1,1), fuera de todos los recorridos.
+  - AREAS: cada avenida es privada de su robot. La fuente la usan los 4
+    corredores pero no el coordinador -> AreaPC. }
+procesos
+  proceso asignarIds
+  comenzar
+    EnviarMensaje(1, r1)
+    EnviarMensaje(2, r2)
+    EnviarMensaje(3, r3)
+    EnviarMensaje(4, r4)
+  fin
+  proceso recibirDe(E id: numero; ES ca: numero)
+  comenzar
+    si (id = 1)
+      RecibirMensaje(ca, r1)
+    sino
+      si (id = 2)
+        RecibirMensaje(ca, r2)
+      sino
+        si (id = 3)
+          RecibirMensaje(ca, r3)
+        sino
+          RecibirMensaje(ca, r4)
+  fin
+  proceso buscarPapel(ES hay: boolean)
+  { Va a la fuente con exclusion mutua y trae un papel si quedaba. }
+  variables
+    av, ca: numero
+  comenzar
+    av := PosAv
+    ca := PosCa
+    BloquearEsquina(11, 11)
+    Pos(11, 11)
+    si (HayPapelEnLaEsquina)
+      tomarPapel
+      hay := V
+    sino
+      hay := F
+    Pos(av, ca)
+    LiberarEsquina(11, 11)
+  fin
+areas
+  av4: AreaP(4,1,4,100)
+  av6: AreaP(6,1,6,100)
+  av8: AreaP(8,1,8,100)
+  av10: AreaP(10,1,10,100)
+  fuente: AreaPC(11,11,11,11)
+  esqCoord: AreaP(1,1,1,1)
+robots
+  robot corredor
+  variables
+    id, ca: numero
+    hay, seguir: boolean
+  comenzar
+    RecibirMensaje(id, coord)
+    seguir := V
+    mientras (seguir)
+      buscarPapel(hay)
+      si (hay)
+        depositarPapel
+        si (PosCa < 100)
+          mover
+        sino
+          seguir := F         { completo la avenida }
+      sino
+        seguir := F           { la fuente se vacio }
+    ca := PosCa
+    EnviarMensaje(id, coord)
+    EnviarMensaje(ca, coord)
+  fin
+  robot coordinador
+  variables
+    id, ca, max, idMax: numero
+  comenzar
+    asignarIds
+    max := -1
+    repetir 4
+      RecibirMensaje(id, *)
+      recibirDe(id, ca)
+      si (ca > max)           { estricto: en empate gana el aviso anterior }
+        max := ca
+        idMax := id
+    Informar('Ganador', idMax)
+  fin
+variables
+  r1, r2, r3, r4: corredor
+  coord: coordinador
+comenzar
+  AsignarArea(r1, av4)
+  AsignarArea(r2, av6)
+  AsignarArea(r3, av8)
+  AsignarArea(r4, av10)
+  AsignarArea(r1, fuente)
+  AsignarArea(r2, fuente)
+  AsignarArea(r3, fuente)
+  AsignarArea(r4, fuente)
+  AsignarArea(coord, esqCoord)
+  Iniciar(r1, 4, 1)
+  Iniciar(r2, 6, 1)
+  Iniciar(r3, 8, 1)
+  Iniciar(r4, 10, 1)
+  Iniciar(coord, 1, 1)
+fin

@@ -1,0 +1,131 @@
+programa P3ej3
+{ ENUNCIADO - Practica 3, Ejercicio 3 (2026):
+  Realice un programa donde 4 robots colaboren para recoger todas las flores
+  de una esquina indicada por un robot jefe, seleccionada de manera
+  aleatoria dentro del cuadrante (2,2) y (10,10). Para ello el jefe
+  determina inicialmente una esquina y los robots deben accederla, tomar
+  de a una las flores y volver a su posicion inicial. Cuando los robots
+  terminan el jefe debera informar cual de ellos logro recoger mas flores.
+  Las esquinas de inicio de los robots deberan ser jefe (1,1) y robots
+  (2,1), (3,1), (4,1) y (5,1). }
+
+{ RESOLUCION:
+  - El jefe sortea UNA esquina y les manda a cada robot su id y la esquina
+    (3 mensajes por robot: id, av, ca). Como los manda el mismo emisor al
+    mismo receptor, llegan en ese orden.
+  - Los 4 robots compiten por la misma esquina: "de a una" -> bloquear,
+    ir, tomar UNA flor (si hay), volver a su esquina, liberar. Se repite
+    hasta encontrar la esquina vacia. Se pregunta si hay flor ESTANDO en
+    la esquina y con la esquina bloqueada (si se preguntara antes de
+    bloquear, otro podria llevarse la ultima flor).
+  - Al terminar, cada robot manda id + cantidad. El jefe usa el patron
+    ID + dato: recibe el id con * y la cantidad DE ESE robot.
+  - Areas: como la esquina se sortea en ejecucion, el area tiene que cubrir
+    todo el cuadrante (2,2)-(10,10). La usan los 4 robots y no el jefe ->
+    AreaPC. Las esquinas de inicio (en la calle 1) son privadas. }
+procesos
+  proceso enviarEsquina(E id: numero; E av: numero; E ca: numero)
+  comenzar
+    si (id = 1)
+      EnviarMensaje(id, r1)
+      EnviarMensaje(av, r1)
+      EnviarMensaje(ca, r1)
+    sino
+      si (id = 2)
+        EnviarMensaje(id, r2)
+        EnviarMensaje(av, r2)
+        EnviarMensaje(ca, r2)
+      sino
+        si (id = 3)
+          EnviarMensaje(id, r3)
+          EnviarMensaje(av, r3)
+          EnviarMensaje(ca, r3)
+        sino
+          EnviarMensaje(id, r4)
+          EnviarMensaje(av, r4)
+          EnviarMensaje(ca, r4)
+  fin
+  proceso recibirDe(E id: numero; ES cant: numero)
+  comenzar
+    si (id = 1)
+      RecibirMensaje(cant, r1)
+    sino
+      si (id = 2)
+        RecibirMensaje(cant, r2)
+      sino
+        si (id = 3)
+          RecibirMensaje(cant, r3)
+        sino
+          RecibirMensaje(cant, r4)
+  fin
+areas
+  cuadrante: AreaPC(2,2,10,10)
+  esq1: AreaP(2,1,2,1)
+  esq2: AreaP(3,1,3,1)
+  esq3: AreaP(4,1,4,1)
+  esq4: AreaP(5,1,5,1)
+  esqJefe: AreaP(1,1,1,1)
+robots
+  robot recolector
+  variables
+    id, av, ca, avIni, caIni, cant: numero
+    seguir: boolean
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    RecibirMensaje(id, jefe)
+    RecibirMensaje(av, jefe)
+    RecibirMensaje(ca, jefe)
+    cant := 0
+    seguir := V
+    mientras (seguir)
+      BloquearEsquina(av, ca)
+      Pos(av, ca)
+      si (HayFlorEnLaEsquina)
+        tomarFlor
+        cant := cant + 1
+      sino
+        seguir := F
+      Pos(avIni, caIni)
+      LiberarEsquina(av, ca)
+    EnviarMensaje(id, jefe)
+    EnviarMensaje(cant, jefe)
+  fin
+  robot tipoJefe
+  variables
+    av, ca, i, id, cant, max, idMax: numero
+  comenzar
+    Random(av, 2, 10)
+    Random(ca, 2, 10)
+    i := 1
+    repetir 4
+      enviarEsquina(i, av, ca)
+      i := i + 1
+    max := -1
+    repetir 4
+      RecibirMensaje(id, *)
+      recibirDe(id, cant)
+      si (cant > max)
+        max := cant
+        idMax := id
+    Informar('RecogioMasFlores', idMax)
+  fin
+variables
+  r1, r2, r3, r4: recolector
+  jefe: tipoJefe
+comenzar
+  AsignarArea(r1, cuadrante)
+  AsignarArea(r2, cuadrante)
+  AsignarArea(r3, cuadrante)
+  AsignarArea(r4, cuadrante)
+  AsignarArea(r1, esq1)
+  AsignarArea(r2, esq2)
+  AsignarArea(r3, esq3)
+  AsignarArea(r4, esq4)
+  AsignarArea(jefe, esqJefe)
+  Iniciar(r1, 2, 1)
+  Iniciar(r2, 3, 1)
+  Iniciar(r3, 4, 1)
+  Iniciar(r4, 5, 1)
+  Iniciar(jefe, 1, 1)
+fin

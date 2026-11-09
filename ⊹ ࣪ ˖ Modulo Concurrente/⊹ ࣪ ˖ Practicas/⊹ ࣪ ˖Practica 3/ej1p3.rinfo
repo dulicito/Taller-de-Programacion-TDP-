@@ -1,0 +1,143 @@
+programa P3ej1
+{ ENUNCIADO - Practica 3, Ejercicio 1 (2026):
+  Realice un programa con 2 robots recolectores de flores (floreros) y 2
+  robots recolectores de papeles (papeleros).
+  Los floreros comparten area y tienen 5 intentos cada uno para juntar las
+  flores de una esquina, dentro de dicha area, elegida al azar en cada
+  intento. Del mismo modo, los papeleros comparten area y tienen 3 intentos
+  cada uno para juntar los papeles. En cada intento cada robot va a la
+  esquina al azar, junta todos los elementos (flores o papeles segun le
+  corresponda) y vuelve a su esquina original. Al finalizar sus intentos
+  cada robot debe acceder a la esquina (10,10) y depositar los elementos
+  recogidos de a uno.
+  - Area de floreros: (1,1) a (5,10)
+  - Area de papeleros: (6,1) a (10,9)
+  - Esquinas de inicio de floreros: (6,10) y (7,10)
+  - Esquinas de inicio de papeleros: (8,10) y (9,10) }
+
+{ RESOLUCION (memoria compartida, sin mensajes):
+  - AREAS (definicion oficial):
+    * Area de floreros: la usan 2 de los 4 robots -> AreaPC.
+    * Area de papeleros: 2 de 4 -> AreaPC.
+    * Esquina (10,10): la usan los 4 robots (todos) -> AreaC.
+    * Cada esquina de inicio: AreaP de su robot.
+    Las areas no se superponen: las esquinas de inicio estan en la calle 10
+    y el area de papeleros llega solo hasta la calle 9.
+  - BLOQUEOS:
+    * La esquina al azar: a los 2 floreros (o a los 2 papeleros) les puede
+      tocar la misma, asi que se bloquea antes de ir y se libera despues de
+      volver a la esquina de inicio (esquina segura).
+    * (10,10): "de a uno" -> se bloquea, se deposita UN elemento, se vuelve
+      y se libera, en cada repeticion. Asi los demas pueden intercalarse.
+  - 2 tipos (florero y papelero) porque juntan cosas distintas y hacen una
+    cantidad distinta de intentos. }
+procesos
+  proceso juntarFlores(ES f: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      f := f + 1
+  fin
+  proceso juntarPapeles(ES p: numero)
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      p := p + 1
+  fin
+  proceso intentoFlores(E avIni: numero; E caIni: numero; ES f: numero)
+  { Un intento: esquina al azar del area de floreros (1..5, 1..10). }
+  variables
+    av, ca: numero
+  comenzar
+    Random(av, 1, 5)
+    Random(ca, 1, 10)
+    BloquearEsquina(av, ca)
+    Pos(av, ca)
+    juntarFlores(f)
+    Pos(avIni, caIni)
+    LiberarEsquina(av, ca)
+  fin
+  proceso intentoPapeles(E avIni: numero; E caIni: numero; ES p: numero)
+  { Un intento: esquina al azar del area de papeleros (6..10, 1..9). }
+  variables
+    av, ca: numero
+  comenzar
+    Random(av, 6, 10)
+    Random(ca, 1, 9)
+    BloquearEsquina(av, ca)
+    Pos(av, ca)
+    juntarPapeles(p)
+    Pos(avIni, caIni)
+    LiberarEsquina(av, ca)
+  fin
+  proceso depositarFlores(E avIni: numero; E caIni: numero; E f: numero)
+  { Deposita de a una en (10,10): un bloqueo por cada flor. }
+  comenzar
+    repetir f
+      BloquearEsquina(10, 10)
+      Pos(10, 10)
+      depositarFlor
+      Pos(avIni, caIni)
+      LiberarEsquina(10, 10)
+  fin
+  proceso depositarPapeles(E avIni: numero; E caIni: numero; E p: numero)
+  comenzar
+    repetir p
+      BloquearEsquina(10, 10)
+      Pos(10, 10)
+      depositarPapel
+      Pos(avIni, caIni)
+      LiberarEsquina(10, 10)
+  fin
+areas
+  areaFloreros: AreaPC(1,1,5,10)
+  areaPapeleros: AreaPC(6,1,10,9)
+  deposito: AreaC(10,10,10,10)
+  inicioF1: AreaP(6,10,6,10)
+  inicioF2: AreaP(7,10,7,10)
+  inicioP1: AreaP(8,10,8,10)
+  inicioP2: AreaP(9,10,9,10)
+robots
+  robot florero
+  variables
+    avIni, caIni, f: numero
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    f := 0
+    repetir 5
+      intentoFlores(avIni, caIni, f)
+    depositarFlores(avIni, caIni, f)
+  fin
+  robot papelero
+  variables
+    avIni, caIni, p: numero
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    p := 0
+    repetir 3
+      intentoPapeles(avIni, caIni, p)
+    depositarPapeles(avIni, caIni, p)
+  fin
+variables
+  f1, f2: florero
+  p1, p2: papelero
+comenzar
+  AsignarArea(f1, areaFloreros)
+  AsignarArea(f2, areaFloreros)
+  AsignarArea(p1, areaPapeleros)
+  AsignarArea(p2, areaPapeleros)
+  AsignarArea(f1, deposito)
+  AsignarArea(f2, deposito)
+  AsignarArea(p1, deposito)
+  AsignarArea(p2, deposito)
+  AsignarArea(f1, inicioF1)
+  AsignarArea(f2, inicioF2)
+  AsignarArea(p1, inicioP1)
+  AsignarArea(p2, inicioP2)
+  Iniciar(f1, 6, 10)
+  Iniciar(f2, 7, 10)
+  Iniciar(p1, 8, 10)
+  Iniciar(p2, 9, 10)
+fin

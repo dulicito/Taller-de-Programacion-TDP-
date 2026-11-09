@@ -1,0 +1,117 @@
+programa P3ej4b
+{ ENUNCIADO - Practica 3, Ejercicio 4 b) y c) (2026):
+  b- Implemente una variante en la cual los robots luego de tomar cada flor
+     de la esquina (10,10) vuelvan a su esquina inicial, pasen a la esquina
+     (11,11) a depositarla y finalmente vuelvan a la esquina inicial.
+  c- Analice:
+     - Cual de las 2 soluciones maximiza la concurrencia?
+     - Se podria resolver este problema sin que los robots deban regresar
+       a su esquina inicial? }
+
+{ RESOLUCION b):
+  - Camino de cada flor: inicio -> (10,10) -> inicio -> (11,11) -> inicio.
+  - Cada esquina se bloquea SOLO durante su propio viaje: bloquear (10,10),
+    tomar, volver, liberar; despues bloquear (11,11), depositar, volver,
+    liberar. Nunca se tienen dos esquinas bloqueadas a la vez.
+  - El resto (ids, aviso al coordinador despues de salir, ultimo en
+    terminar, areas) es igual que en el inciso a.
+
+  ANALISIS c):
+  - Maximiza la concurrencia la variante b. En la variante a, el robot
+    mantiene (10,10) bloqueada mientras espera y usa (11,11), asi que
+    nadie puede tomar la flor siguiente hasta que el termine de llegar
+    a la otra esquina. En la b, cada esquina queda libre apenas el robot
+    sale de ella: mientras uno deposita en (11,11), otro ya puede estar
+    tomando en (10,10). Es la regla oficial de proteger el recurso
+    compartido el MENOR tiempo posible.
+  - Sin volver a la esquina inicial: la regla es liberar una esquina
+    compartida solo despues de moverse a una esquina SEGURA. La esquina
+    inicial (privada) es la forma mas simple de tener ese lugar seguro.
+    Se podria evitar volver usando otra esquina segura (por ejemplo, una
+    esquina privada intermedia) o encadenando bloqueos como en la
+    variante a: ir de (10,10) a (11,11) sin pasar por el inicio. Lo que
+    NO se puede hacer es, al terminar de depositar, ir directo de (11,11)
+    a (10,10) teniendo bloqueada (11,11): ese robot pediria (11,11) y
+    despues (10,10), mientras otro pide (10,10) y despues (11,11), y se
+    puede formar un ciclo de espera (DEADLOCK). }
+procesos
+  proceso asignarIds
+  comenzar
+    EnviarMensaje(1, r1)
+    EnviarMensaje(2, r2)
+    EnviarMensaje(3, r3)
+    EnviarMensaje(4, r4)
+  fin
+areas
+  origen: AreaPC(10,10,10,10)
+  destino: AreaC(11,11,11,11)
+  esq1: AreaP(9,9,9,9)
+  esq2: AreaP(9,10,9,10)
+  esq3: AreaP(9,11,9,11)
+  esq4: AreaP(9,12,9,12)
+  esqCoord: AreaP(1,1,1,1)
+robots
+  robot movedor
+  variables
+    id, avIni, caIni: numero
+    seguir: boolean
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    seguir := V
+    mientras (seguir)
+      BloquearEsquina(10, 10)
+      Pos(10, 10)
+      si (HayFlorEnLaEsquina)
+        tomarFlor
+        Pos(avIni, caIni)         { sale de (10,10) a su esquina segura }
+        LiberarEsquina(10, 10)
+        BloquearEsquina(11, 11)
+        Pos(11, 11)
+        depositarFlor
+        Pos(avIni, caIni)
+        LiberarEsquina(11, 11)
+      sino
+        seguir := F
+        Pos(avIni, caIni)
+        LiberarEsquina(10, 10)
+    RecibirMensaje(id, coord)   { recien ahora necesita su id }
+    EnviarMensaje(id, coord)
+  fin
+  robot coordinador
+  variables
+    id, ultimo: numero
+  comenzar
+    asignarIds
+    repetir 4
+      RecibirMensaje(id, *)
+      ultimo := id
+    Informar('FinalizoUltimo', ultimo)
+    Pos(11, 11)
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+  fin
+variables
+  r1, r2, r3, r4: movedor
+  coord: coordinador
+comenzar
+  AsignarArea(r1, origen)
+  AsignarArea(r2, origen)
+  AsignarArea(r3, origen)
+  AsignarArea(r4, origen)
+  AsignarArea(r1, destino)
+  AsignarArea(r2, destino)
+  AsignarArea(r3, destino)
+  AsignarArea(r4, destino)
+  AsignarArea(coord, destino)
+  AsignarArea(r1, esq1)
+  AsignarArea(r2, esq2)
+  AsignarArea(r3, esq3)
+  AsignarArea(r4, esq4)
+  AsignarArea(coord, esqCoord)
+  Iniciar(r1, 9, 9)
+  Iniciar(r2, 9, 10)
+  Iniciar(r3, 9, 11)
+  Iniciar(r4, 9, 12)
+  Iniciar(coord, 1, 1)
+fin

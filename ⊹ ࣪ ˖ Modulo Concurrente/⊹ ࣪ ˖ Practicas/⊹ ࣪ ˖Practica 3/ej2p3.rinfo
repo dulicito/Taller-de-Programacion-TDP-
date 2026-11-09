@@ -1,0 +1,165 @@
+programa P3ej2
+{ ENUNCIADO - Practica 3, Ejercicio 2 (2026):
+  Realice un programa en el cual 2 robots corren una carrera. El recorrido
+  realizado por cada uno es el que se muestra en la figura. Durante el
+  recorrido el robot 1 debe juntar todas las flores que encuentre en los
+  vertices de cada escalon, y el robot 2 debe juntar todos los papeles que
+  encuentre en los vertices de cada escalon. Al finalizar deben informar la
+  cantidad de elementos recogidos.
+  El robot 1 debe iniciar su recorrido en la esquina (1,1) y el robot 2 en
+  la esquina (31,1).
+  Al finalizar la carrera, un robot jefe (inicializado en la esquina (16,1))
+  debe informar que robot llego primero a la esquina central de su
+  recorrido. }
+
+{ RECORRIDO (segun la figura):
+  Robot 1, desde (1,1): escalones de 5, 4, 3, 2 y 1 (sube k, avanza k a la
+  derecha) hasta el centro (16,16). Despues, en espejo: izquierda 1,
+  sube 1, izquierda 2, sube 2, ..., izquierda 5, sube 5 -> termina en (1,31).
+  Robot 2: lo mismo reflejado desde (31,1) (avanza hacia la izquierda en la
+  subida y hacia la derecha en la bajada) -> termina en (31,31).
+  Los dos recorridos solo comparten la esquina central (16,16).
+  Se junta en cada VERTICE (cada esquina donde el robot gira), mas la
+  esquina de inicio y la final.
+
+  RESOLUCION:
+  - (16,16) la usan los 2 corredores pero no el jefe -> AreaPC, y se
+    BLOQUEA: se bloquea justo antes de entrar y se libera despues de salir
+    a una esquina segura.
+  - "Llego primero a la esquina central": cada robot le envia su numero al
+    jefe EN EL MOMENTO en que entra a (16,16) (no al final de la carrera).
+    El primer mensaje que recibe el jefe es el del ganador.
+  - "Al finalizar la carrera": cada robot tambien avisa al terminar. Todos
+    los mensajes son del mismo tipo (numeros) y el jefe recibe los 4; el
+    primero siempre es un aviso de llegada al centro, porque cada robot
+    manda el aviso de centro antes que el de fin.
+  - 2 tipos de robot: giran hacia lados opuestos y juntan cosas distintas.
+    Cada uno conoce su numero (1 o 2) por su tipo.
+  - Areas: lado izquierdo (1..15) privado del robot 1, lado derecho (17..31)
+    privado del robot 2, (16,1) privada del jefe, (16,16) compartida. }
+procesos
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  proceso juntar(E tipo: numero; ES cant: numero)
+  { tipo 1: flores | tipo 2: papeles }
+  comenzar
+    si (tipo = 1)
+      mientras (HayFlorEnLaEsquina)
+        tomarFlor
+        cant := cant + 1
+    sino
+      mientras (HayPapelEnLaEsquina)
+        tomarPapel
+        cant := cant + 1
+  fin
+  proceso avanzar(E k: numero; E tipo: numero; ES cant: numero)
+  { Avanza k esquinas y junta en la esquina de llegada (un vertice). }
+  comenzar
+    repetir k
+      mover
+    juntar(tipo, cant)
+  fin
+  proceso centro(E id: numero; E tipo: numero; ES cant: numero)
+  { Entra a (16,16) con exclusion mutua, avisa al jefe que llego, junta,
+    sale hacia atras (esquina segura) y recien ahi libera. }
+  comenzar
+    BloquearEsquina(16, 16)
+    mover
+    EnviarMensaje(id, jefe)
+    juntar(tipo, cant)
+    repetir 2
+      derecha
+    mover
+    LiberarEsquina(16, 16)
+    juntar(tipo, cant)          { vertice del primer escalon de bajada }
+  fin
+areas
+  ladoIzq: AreaP(1,1,15,31)
+  ladoDer: AreaP(17,1,31,31)
+  esqJefe: AreaP(16,1,16,1)
+  esqCentral: AreaPC(16,16,16,16)
+robots
+  robot corredorIzq
+  { Robot 1: flores. Sube girando a la derecha; baja girando a la izquierda. }
+  variables
+    cant, k: numero
+  comenzar
+    cant := 0
+    juntar(1, cant)             { esquina de inicio }
+    k := 5
+    repetir 4                   { escalones 5, 4, 3, 2 }
+      avanzar(k, 1, cant)       { norte }
+      derecha
+      avanzar(k, 1, cant)       { este }
+      izquierda
+      k := k - 1
+    avanzar(1, 1, cant)         { ultimo escalon: sube 1 hasta (15,16) }
+    derecha                     { mira al este, hacia el centro }
+    centro(1, 1, cant)          { queda en (15,16) mirando al oeste }
+    derecha                     { norte }
+    avanzar(1, 1, cant)
+    k := 2
+    repetir 4                   { escalones 2, 3, 4, 5 }
+      izquierda                 { oeste }
+      avanzar(k, 1, cant)
+      derecha                   { norte }
+      avanzar(k, 1, cant)
+      k := k + 1
+    Informar('FloresRecogidas', cant)
+    EnviarMensaje(1, jefe)      { termino la carrera }
+  fin
+  robot corredorDer
+  { Robot 2: papeles. Recorrido en espejo del robot 1. }
+  variables
+    cant, k: numero
+  comenzar
+    cant := 0
+    juntar(2, cant)
+    k := 5
+    repetir 4
+      avanzar(k, 2, cant)       { norte }
+      izquierda
+      avanzar(k, 2, cant)       { oeste }
+      derecha
+      k := k - 1
+    avanzar(1, 2, cant)         { sube 1 hasta (17,16) }
+    izquierda                   { mira al oeste, hacia el centro }
+    centro(2, 2, cant)          { queda en (17,16) mirando al este }
+    izquierda                   { norte }
+    avanzar(1, 2, cant)
+    k := 2
+    repetir 4
+      derecha                   { este }
+      avanzar(k, 2, cant)
+      izquierda                 { norte }
+      avanzar(k, 2, cant)
+      k := k + 1
+    Informar('PapelesRecogidos', cant)
+    EnviarMensaje(2, jefe)
+  fin
+  robot tipoJefe
+  variables
+    id, ganador: numero
+  comenzar
+    RecibirMensaje(ganador, *)  { el primer aviso es la llegada al centro }
+    repetir 3                   { el otro aviso de centro y los 2 de fin }
+      RecibirMensaje(id, *)
+    Informar('LlegoPrimeroAlCentro', ganador)
+  fin
+variables
+  r1: corredorIzq
+  r2: corredorDer
+  jefe: tipoJefe
+comenzar
+  AsignarArea(r1, ladoIzq)
+  AsignarArea(r1, esqCentral)
+  AsignarArea(r2, ladoDer)
+  AsignarArea(r2, esqCentral)
+  AsignarArea(jefe, esqJefe)
+  Iniciar(r1, 1, 1)
+  Iniciar(r2, 31, 1)
+  Iniciar(jefe, 16, 1)
+fin

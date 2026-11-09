@@ -1,0 +1,144 @@
+programa P3ej6d
+{ ENUNCIADO - Practica 3, Ejercicio 6.d (2026):
+  Modifique el ejercicio anterior (6.a) para que ahora el robot
+  fiscalizador espere a que todos los robots recolectores hayan completado
+  sus cuadrantes antes de indicarles la calle que deberan recorrer. }
+
+{ RESOLUCION 6.d:
+  - Los recolectores no cambian. Solo cambia el fiscalizador: primero
+    recibe LOS DOS avisos (guardando el orden de llegada) y recien despues
+    responde: 20 al primero y 21 al segundo.
+  - Es una barrera con coordinador: ningun recolector empieza a depositar
+    hasta que ambos terminaron su cuadrante.
+  - Todo lo demas (cruces bloqueados por tramos, areas, supuestos) es igual
+    que en 6.a. }
+procesos de recorrido pasan a usar ese valor.
+  - Los cruces dejan de ser fijos: dependen de los dos tamanios. Se podria
+    mandar a cada robot tambien el tamanio del otro para que calcule donde
+    se cruzan, o bien bloquear toda esquina de su perimetro que pueda
+    pertenecer al cuadrante del otro (es mas simple, pero bloquea mas y
+    reduce la concurrencia). Puede pasar incluso que no se crucen.
+  - Las areas se declaran para el PEOR CASO (el tamanio maximo posible). }
+procesos
+  proceso juntar(E tipo: numero; ES f: numero; ES p: numero)
+  { tipo 1: solo flores | tipo 2: flores y papeles }
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      f := f + 1
+    si (tipo = 2)
+      mientras (HayPapelEnLaEsquina)
+        tomarPapel
+        p := p + 1
+  fin
+  proceso ladoLibre(E n: numero; E tipo: numero; ES f: numero; ES p: numero)
+  { n pasos sin conflicto, juntando en cada esquina antes de moverse. }
+  comenzar
+    repetir n
+      juntar(tipo, f, p)
+      mover
+  fin
+  proceso ladoConCruce(E antes: numero; E despues: numero; E avC: numero; E caC: numero; E tipo: numero; ES f: numero; ES p: numero)
+  { Lado con una esquina de cruce: tramo libre, cruce protegido, tramo libre. }
+  comenzar
+    ladoLibre(antes, tipo, f, p)
+    juntar(tipo, f, p)          { esquina anterior al cruce }
+    BloquearEsquina(avC, caC)
+    mover                       { entra al cruce }
+    juntar(tipo, f, p)
+    mover                       { sale a una esquina segura }
+    LiberarEsquina(avC, caC)
+    ladoLibre(despues, tipo, f, p)
+  fin
+  proceso depositarEnCalle(E tipo: numero)
+  { Recorre la calle desde la avenida 1 dejando una flor (y un papel si es
+    tipo 2) por esquina, hasta la avenida 100 o hasta quedarse sin nada. }
+  variables
+    seguir: boolean
+  comenzar
+    seguir := V
+    mientras (seguir)
+      si (HayFlorEnLaBolsa)
+        depositarFlor
+      si (tipo = 2)
+        si (HayPapelEnLaBolsa)
+          depositarPapel
+      si ((PosAv < 100) & (HayFlorEnLaBolsa | HayPapelEnLaBolsa))
+        mover
+      sino
+        seguir := F
+  fin
+areas
+  cuadrantes: AreaPC(2,2,15,15)
+  calles: AreaPC(1,20,100,21)
+  esqFiscal: AreaP(1,1,1,1)
+robots
+  robot recolector1
+  { Perimetro (2,2)-(8,8), solo flores. Cruces: (5,8) y (8,5). }
+  variables
+    f, p, calle: numero
+  comenzar
+    f := 0
+    p := 0
+    ladoLibre(6, 1, f, p)                 { avenida 2 hacia el norte }
+    derecha
+    ladoConCruce(2, 2, 5, 8, 1, f, p)     { calle 8 hacia el este }
+    derecha
+    ladoConCruce(2, 2, 8, 5, 1, f, p)     { avenida 8 hacia el sur }
+    derecha
+    ladoLibre(6, 1, f, p)                 { calle 2 hacia el oeste }
+    EnviarMensaje(1, fisc)
+    RecibirMensaje(calle, fisc)
+    repetir 2                             { de oeste a este }
+      derecha
+    Pos(1, calle)
+    depositarEnCalle(1)
+  fin
+  robot recolector2
+  { Perimetro (5,5)-(15,15), flores y papeles. Cruces: (5,8) y (8,5). }
+  variables
+    f, p, calle: numero
+  comenzar
+    f := 0
+    p := 0
+    ladoConCruce(2, 6, 5, 8, 2, f, p)     { avenida 5 hacia el norte }
+    derecha
+    ladoLibre(10, 2, f, p)                { calle 15 hacia el este }
+    derecha
+    ladoLibre(10, 2, f, p)                { avenida 15 hacia el sur }
+    derecha
+    ladoConCruce(6, 2, 8, 5, 2, f, p)     { calle 5 hacia el oeste }
+    EnviarMensaje(2, fisc)
+    RecibirMensaje(calle, fisc)
+    repetir 2
+      derecha
+    Pos(1, calle)
+    depositarEnCalle(2)
+  fin
+  robot fiscalizador
+  variables
+    primero, segundo: numero
+  comenzar
+    RecibirMensaje(primero, *)            { espera a que terminen los dos }
+    RecibirMensaje(segundo, *)
+    si (primero = 1)
+      EnviarMensaje(20, r1)
+      EnviarMensaje(21, r2)
+    sino
+      EnviarMensaje(20, r2)
+      EnviarMensaje(21, r1)
+  fin
+variables
+  r1: recolector1
+  r2: recolector2
+  fisc: fiscalizador
+comenzar
+  AsignarArea(r1, cuadrantes)
+  AsignarArea(r2, cuadrantes)
+  AsignarArea(r1, calles)
+  AsignarArea(r2, calles)
+  AsignarArea(fisc, esqFiscal)
+  Iniciar(r1, 2, 2)
+  Iniciar(r2, 5, 5)
+  Iniciar(fisc, 1, 1)
+fin
