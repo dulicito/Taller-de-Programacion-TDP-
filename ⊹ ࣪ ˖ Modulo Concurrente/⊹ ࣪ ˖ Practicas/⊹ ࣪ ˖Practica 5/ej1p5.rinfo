@@ -1,0 +1,169 @@
+programa P5ej1
+{ ENUNCIADO - Practica 5, Ejercicio 1 (2026):
+  Se organizo una competencia entre el equipo rojo y el equipo azul. Cada
+  equipo consta de dos robots, y debe realizar una tarea:
+  - Los robots R1 y R2 del equipo rojo debe juntar todas las flores de las
+    avenidas 2 y 3 respectivamente
+  - Los robots A1 y A2 del equipo azul debe juntar todos los papeles de las
+    calles 98 y 99 respectivamente
+  Al finalizar la competencia, un robot fiscalizador debera informar el
+  equipo que junto mas objetos. }
+
+{ RESOLUCION:
+  - SUPUESTOS (el enunciado no da esquinas de inicio): R1 (2,1), R2 (3,1),
+    A1 (1,98), A2 (1,99), fiscalizador (1,1). Cada robot arranca al
+    principio de su recorrido.
+  - CRUCES: las avenidas 2 y 3 se cruzan con las calles 98 y 99 en 4
+    esquinas: (2,98), (2,99), (3,98), (3,99). Solo esas se bloquean; el resto
+    del recorrido no tiene conflicto (tramos, como indica la teoria oficial).
+  - Cada robot pasa por DOS esquinas de cruce SEGUIDAS. Nunca puede estar
+    parado en una esquina compartida sin tenerla bloqueada, asi que bloquea
+    la siguiente ANTES de liberar la actual:
+      bloquear 1ra, entrar, juntar, bloquear 2da, entrar, liberar 1ra,
+      juntar, salir a una esquina segura, liberar 2da.
+    No hay deadlock: los rojos piden (x,98) y despues (x,99); los azules,
+    (2,y) y despues (3,y). Siempre se pide primero la esquina de menor
+    avenida+calle, asi que no se puede formar un ciclo de espera.
+  - RESULTADO: cada robot recibe su id del fiscalizador (1 y 2 rojos, 3 y 4
+    azules) cuando termino, y le manda id + cantidad. El fiscalizador
+    recibe el id con * y la cantidad DE ESE robot, y suma por equipo.
+  - AREAS: las 4 esquinas de cruce las usan los 4 competidores y no el
+    fiscalizador -> AreaPC. El resto de cada recorrido es privado. }
+procesos
+  proceso juntar(E tipo: numero; ES cant: numero)
+  { tipo 1: flores | tipo 2: papeles }
+  comenzar
+    si (tipo = 1)
+      mientras (HayFlorEnLaEsquina)
+        tomarFlor
+        cant := cant + 1
+    sino
+      mientras (HayPapelEnLaEsquina)
+        tomarPapel
+        cant := cant + 1
+  fin
+  proceso tramoLibre(E n: numero; E tipo: numero; ES cant: numero)
+  comenzar
+    repetir n
+      juntar(tipo, cant)
+      mover
+  fin
+  proceso cruceDoble(E av1: numero; E ca1: numero; E av2: numero; E ca2: numero; E tipo: numero; ES cant: numero)
+  { Atraviesa dos esquinas compartidas consecutivas sin quedar nunca parado
+    en una esquina compartida sin bloquear. }
+  comenzar
+    BloquearEsquina(av1, ca1)
+    mover
+    juntar(tipo, cant)
+    BloquearEsquina(av2, ca2)
+    mover
+    LiberarEsquina(av1, ca1)
+    juntar(tipo, cant)
+    mover                         { sale a una esquina segura }
+    LiberarEsquina(av2, ca2)
+  fin
+  proceso recibirDe(E id: numero; ES cant: numero)
+  comenzar
+    si (id = 1)
+      RecibirMensaje(cant, r1)
+    sino
+      si (id = 2)
+        RecibirMensaje(cant, r2)
+      sino
+        si (id = 3)
+          RecibirMensaje(cant, a1)
+        sino
+          RecibirMensaje(cant, a2)
+  fin
+areas
+  cruces: AreaPC(2,98,3,99)
+  avR1: AreaP(2,1,2,97)
+  finR1: AreaP(2,100,2,100)
+  avR2: AreaP(3,1,3,97)
+  finR2: AreaP(3,100,3,100)
+  iniA1: AreaP(1,98,1,98)
+  calleA1: AreaP(4,98,100,98)
+  iniA2: AreaP(1,99,1,99)
+  calleA2: AreaP(4,99,100,99)
+  esqFiscal: AreaP(1,1,1,1)
+robots
+  robot rojo
+  { Avenida x de la calle 1 a la 100, juntando flores. }
+  variables
+    id, cant, av: numero
+  comenzar
+    cant := 0
+    av := PosAv
+    tramoLibre(96, 1, cant)       { calles 1..96, queda en la 97 }
+    juntar(1, cant)               { calle 97 }
+    cruceDoble(av, 98, av, 99, 1, cant)
+    juntar(1, cant)               { calle 100 }
+    RecibirMensaje(id, fisc)
+    EnviarMensaje(id, fisc)
+    EnviarMensaje(cant, fisc)
+  fin
+  robot azul
+  { Calle y de la avenida 1 a la 100, juntando papeles. }
+  variables
+    id, cant, ca: numero
+  comenzar
+    cant := 0
+    ca := PosCa
+    derecha                       { este }
+    juntar(2, cant)               { avenida 1 }
+    cruceDoble(2, ca, 3, ca, 2, cant)
+    tramoLibre(96, 2, cant)       { avenidas 4..99, queda en la 100 }
+    juntar(2, cant)               { avenida 100 }
+    RecibirMensaje(id, fisc)
+    EnviarMensaje(id, fisc)
+    EnviarMensaje(cant, fisc)
+  fin
+  robot fiscalizador
+  variables
+    id, cant, rojos, azules: numero
+  comenzar
+    EnviarMensaje(1, r1)
+    EnviarMensaje(2, r2)
+    EnviarMensaje(3, a1)
+    EnviarMensaje(4, a2)
+    rojos := 0
+    azules := 0
+    repetir 4
+      RecibirMensaje(id, *)
+      recibirDe(id, cant)
+      si (id < 3)
+        rojos := rojos + cant
+      sino
+        azules := azules + cant
+    si (rojos > azules)
+      Informar('GanoRojo', rojos)
+    sino
+      si (azules > rojos)
+        Informar('GanoAzul', azules)
+      sino
+        Informar('Empate', rojos)
+  fin
+variables
+  r1, r2: rojo
+  a1, a2: azul
+  fisc: fiscalizador
+comenzar
+  AsignarArea(r1, avR1)
+  AsignarArea(r1, finR1)
+  AsignarArea(r2, avR2)
+  AsignarArea(r2, finR2)
+  AsignarArea(a1, iniA1)
+  AsignarArea(a1, calleA1)
+  AsignarArea(a2, iniA2)
+  AsignarArea(a2, calleA2)
+  AsignarArea(r1, cruces)
+  AsignarArea(r2, cruces)
+  AsignarArea(a1, cruces)
+  AsignarArea(a2, cruces)
+  AsignarArea(fisc, esqFiscal)
+  Iniciar(r1, 2, 1)
+  Iniciar(r2, 3, 1)
+  Iniciar(a1, 1, 98)
+  Iniciar(a2, 1, 99)
+  Iniciar(fisc, 1, 1)
+fin

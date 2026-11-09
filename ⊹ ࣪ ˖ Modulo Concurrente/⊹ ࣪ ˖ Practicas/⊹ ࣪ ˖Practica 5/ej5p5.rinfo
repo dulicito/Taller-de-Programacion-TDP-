@@ -1,0 +1,103 @@
+programa P5ej5
+{ ENUNCIADO - Practica 5, Ejercicio 5 (2026):
+  Existe un robot servidor que tiene su bolsa con papeles. Tres robots
+  clientes tienen 4 intentos cada uno para solicitar al servidor que les
+  entregue papeles. Cada vez que el servidor recibe un pedido de papeles de
+  un cliente, se ubicara en la esquina (100,1), colocara alli una cantidad
+  aleatoria de papeles (entre 1 y 5) y avisara al cliente correspondiente
+  la cantidad de papeles que le deposito.
+  Una vez que un cliente recibe un aviso, debera recolectar uno a uno los
+  papeles que le corresponden y depositarlos en su esquina inicial.
+  El programa finalizara cuando todos los clientes hayan completado todos
+  sus intentos. Asuma que el servidor tiene los papeles suficientes para
+  cubrir todas las solicitudes.
+  Los robots clientes inician en las esquinas (10,1), (11,1) y (12,1), y el
+  robot servidor inicia en la esquina (13,1). }
+
+{ RESOLUCION (CLIENTE/SERVIDOR + memoria compartida):
+  - El servidor reparte ids. Un pedido es un solo mensaje: el id del
+    cliente. El servidor lo recibe con * y atiende a ese cliente.
+  - Atencion: el servidor bloquea (100,1), deposita N (random 1..5), vuelve
+    a (13,1), libera y le avisa N al cliente.
+  - El cliente espera el aviso y despues busca sus N papeles DE A UNO: por
+    cada papel bloquea, va, toma uno, vuelve a su esquina, libera y lo
+    deposita ahi.
+  - Hay que bloquear (100,1) porque pueden estar ahi el servidor
+    depositando y uno o varios clientes buscando sus papeles. En (100,1)
+    se mezclan papeles de distintos pedidos, pero como cada cliente toma
+    exactamente su cantidad, siempre hay suficientes.
+  - El servidor sabe que son 12 pedidos en total (3 clientes x 4
+    intentos): termina con un repetir 12, sin mensaje de fin.
+  - Areas: (100,1) la usan los 4 robots (todos) -> AreaC. Las esquinas de
+    inicio son privadas. }
+procesos
+  proceso avisarA(E id: numero; E n: numero)
+  comenzar
+    si (id = 1)
+      EnviarMensaje(n, c1)
+    sino
+      si (id = 2)
+        EnviarMensaje(n, c2)
+      sino
+        EnviarMensaje(n, c3)
+  fin
+areas
+  entrega: AreaC(100,1,100,1)
+  esqC1: AreaP(10,1,10,1)
+  esqC2: AreaP(11,1,11,1)
+  esqC3: AreaP(12,1,12,1)
+  esqServ: AreaP(13,1,13,1)
+robots
+  robot cliente
+  variables
+    id, n, avIni, caIni: numero
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    RecibirMensaje(id, serv)
+    repetir 4
+      EnviarMensaje(id, serv)     { pedido }
+      RecibirMensaje(n, serv)     { cuantos papeles le dejaron }
+      repetir n
+        BloquearEsquina(100, 1)
+        Pos(100, 1)
+        tomarPapel
+        Pos(avIni, caIni)
+        LiberarEsquina(100, 1)
+        depositarPapel
+  fin
+  robot servidor
+  variables
+    id, n: numero
+  comenzar
+    EnviarMensaje(1, c1)
+    EnviarMensaje(2, c2)
+    EnviarMensaje(3, c3)
+    repetir 12
+      RecibirMensaje(id, *)
+      Random(n, 1, 5)
+      BloquearEsquina(100, 1)
+      Pos(100, 1)
+      repetir n
+        depositarPapel
+      Pos(13, 1)
+      LiberarEsquina(100, 1)
+      avisarA(id, n)
+  fin
+variables
+  c1, c2, c3: cliente
+  serv: servidor
+comenzar
+  AsignarArea(c1, entrega)
+  AsignarArea(c2, entrega)
+  AsignarArea(c3, entrega)
+  AsignarArea(serv, entrega)
+  AsignarArea(c1, esqC1)
+  AsignarArea(c2, esqC2)
+  AsignarArea(c3, esqC3)
+  AsignarArea(serv, esqServ)
+  Iniciar(c1, 10, 1)
+  Iniciar(c2, 11, 1)
+  Iniciar(c3, 12, 1)
+  Iniciar(serv, 13, 1)
+fin

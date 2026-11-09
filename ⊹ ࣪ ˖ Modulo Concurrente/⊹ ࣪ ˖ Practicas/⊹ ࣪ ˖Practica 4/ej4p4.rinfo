@@ -1,0 +1,127 @@
+programa P4ej4
+{ ENUNCIADO - Practica 4, Ejercicio 4: Jefe y trabajadores - Master/Slave (2026):
+  Un robot jefe asigna tareas a los trabajadores. Las tareas consisten en
+  1. recoger flores, 2. recoger papeles, 3. vaciar bolsa, 4. finalizar.
+  Existen 2 robots trabajadores que reciben solicitudes de tareas del robot
+  jefe. Para cada solicitud, reciben la tarea y la esquina donde deben
+  realizarla (salvo cuando la tarea es 4 que no deben acceder a una
+  esquina). Luego de recibir la tarea, los robots van a la esquina
+  indicada, realizan la tarea y quedan a la espera de una nueva tarea.
+  El robot jefe inicia en la esquina (1,1) y los robots trabajadores inician
+  en las esquinas (2,1) y (3,1). Las tareas se asignan aleatoriamente a
+  cualquier esquina dentro del cuadrante comprendido entre las esquinas
+  (2,2) y (100,100). El robot jefe envia 10 tareas aleatorias (entre las
+  tareas 1 y 3) a trabajadores aleatorios y termina. Al finalizar el jefe
+  envia la tarea 4.
+  Analice: existe el riesgo de que el programa quede bloqueado, y que
+  ningun robot trabajador pueda realizar su tarea. En que caso puede
+  suceder esto? Que resulta necesario considerar para evitar esta
+  situacion? }
+
+{ RESOLUCION (modelo MASTER/SLAVE):
+  - El jefe repite 10 veces: sortea tarea (1..3), trabajador (1..2) y
+    esquina, y le manda a ese trabajador: tarea, avenida, calle (mismo
+    emisor y mismo receptor: llegan en ese orden). Al final manda la tarea
+    4 a los DOS trabajadores (sin esquina).
+  - El trabajador espera tareas en un "mientras" hasta recibir la 4: no sabe
+    cuantas tareas le van a tocar (puede ser ninguna).
+  - Como el jefe NO espera que terminen, los dos trabajadores pueden estar
+    trabajando a la vez y les puede tocar la MISMA esquina: se bloquea la
+    esquina antes de entrar y se libera despues de volver a su esquina
+    inicial (esquina segura).
+  - Vaciar bolsa = depositar en la esquina todas las flores y papeles que
+    tenga.
+  - Areas: el cuadrante (2,2)-(100,100) lo usan los 2 trabajadores y no el
+    jefe -> AreaPC. Las esquinas de inicio son privadas.
+
+  ANALISIS: riesgo de bloqueo.
+  - Caso: si los trabajadores se QUEDAN en la esquina de la tarea a esperar
+    la siguiente (como sugiere "quedan a la espera"), siguen ocupando esa
+    esquina y tienen que mantenerla bloqueada. Si al trabajador 1 (parado
+    con (a) bloqueada) le toca ir a (b), y al trabajador 2 (parado con (b)
+    bloqueada) le toca ir a (a), cada uno espera la esquina que tiene el
+    otro: DEADLOCK, y ninguno puede hacer su tarea. Tambien se traba si a
+    un trabajador le toca la esquina donde quedo parado el otro y ese otro
+    ya no recibe mas tareas (o recibe la 4 y termina sin liberarla).
+  - Para evitarlo: no retener una esquina compartida mientras se espera
+    otra. Despues de cada tarea, el trabajador vuelve a una esquina SEGURA
+    (su esquina inicial, privada) y recien ahi libera. Asi nunca tiene una
+    esquina bloqueada mientras espera una tarea u otra esquina: es lo que
+    hace esta solucion. }
+procesos
+  proceso realizar(E tarea: numero)
+  comenzar
+    si (tarea = 1)
+      mientras (HayFlorEnLaEsquina)
+        tomarFlor
+    sino
+      si (tarea = 2)
+        mientras (HayPapelEnLaEsquina)
+          tomarPapel
+      sino
+        mientras (HayFlorEnLaBolsa)
+          depositarFlor
+        mientras (HayPapelEnLaBolsa)
+          depositarPapel
+  fin
+  proceso enviarTarea(E t: numero; E tarea: numero; E av: numero; E ca: numero)
+  { Le manda a trabajador t la tarea y la esquina. }
+  comenzar
+    si (t = 1)
+      EnviarMensaje(tarea, w1)
+      EnviarMensaje(av, w1)
+      EnviarMensaje(ca, w1)
+    sino
+      EnviarMensaje(tarea, w2)
+      EnviarMensaje(av, w2)
+      EnviarMensaje(ca, w2)
+  fin
+areas
+  cuadrante: AreaPC(2,2,100,100)
+  esqW1: AreaP(2,1,2,1)
+  esqW2: AreaP(3,1,3,1)
+  esqJefe: AreaP(1,1,1,1)
+robots
+  robot trabajador
+  variables
+    tarea, av, ca, avIni, caIni: numero
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    RecibirMensaje(tarea, jefe)
+    mientras (tarea <> 4)
+      RecibirMensaje(av, jefe)
+      RecibirMensaje(ca, jefe)
+      BloquearEsquina(av, ca)
+      Pos(av, ca)
+      realizar(tarea)
+      Pos(avIni, caIni)           { vuelve a su esquina segura }
+      LiberarEsquina(av, ca)
+      RecibirMensaje(tarea, jefe)
+  fin
+  robot tipoJefe
+  variables
+    t, tarea, av, ca: numero
+  comenzar
+    repetir 10
+      Random(tarea, 1, 3)
+      Random(t, 1, 2)
+      Random(av, 2, 100)
+      Random(ca, 2, 100)
+      enviarTarea(t, tarea, av, ca)
+    EnviarMensaje(4, w1)          { finalizar: sin esquina }
+    EnviarMensaje(4, w2)
+  fin
+variables
+  w1, w2: trabajador
+  jefe: tipoJefe
+comenzar
+  AsignarArea(w1, cuadrante)
+  AsignarArea(w2, cuadrante)
+  AsignarArea(w1, esqW1)
+  AsignarArea(w2, esqW2)
+  AsignarArea(jefe, esqJefe)
+  Iniciar(w1, 2, 1)
+  Iniciar(w2, 3, 1)
+  Iniciar(jefe, 1, 1)
+fin

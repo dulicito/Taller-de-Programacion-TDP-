@@ -1,0 +1,130 @@
+programa P4ej2
+{ ENUNCIADO - Practica 4, Ejercicio 2: Productores y consumidores (2026):
+  Existen dos robots productores que recorren las avenidas 5 y 10
+  respectivamente, juntando todos los papeles de su avenida. A lo largo del
+  recorrido, cada vez que juntan 5 papeles, los depositan en la esquina
+  (50,50).
+  Ademas existen dos robots consumidores que intentan tomar una cantidad
+  aleatoria de papeles (entre 2 y 5) de la esquina (50,50) para depositarla
+  en su esquina de origen. Si la esquina (50,50) no posee la cantidad de
+  papeles requerida, vuelven a su esquina de origen sin tomar ningun papel.
+  Si luego de 8 intentos seguidos un consumidor detecta que la esquina
+  (50,50) no tiene papeles suficientes para juntar, entonces asumira que los
+  productores ya han completado su trabajo y por lo tanto terminara su
+  tarea tambien.
+  Los consumidores inician en las esquinas (11,1) y (12,1) respectivamente. }
+
+{ RESOLUCION (modelo PRODUCTOR/CONSUMIDOR, sin mensajes):
+  - El "buffer" compartido es la esquina (50,50). La usan los 4 robots
+    (todos) -> AreaC, y TODOS la bloquean antes de entrar.
+  - Productor: junta papeles de su avenida. Cada vez que su contador llega
+    a 5, bloquea (50,50), deposita los 5, vuelve a la esquina de su avenida
+    donde estaba y libera. Sigue desde ahi. SUPUESTO: si al terminar la
+    avenida le quedan menos de 5, se los queda (el enunciado solo dice que
+    deposita "cada vez que junta 5"). Los productores inician en (5,1) y
+    (10,1) (el enunciado no lo indica).
+  - Consumidor: en cada intento sortea N (2..5), bloquea, entra y toma
+    papeles de a uno hasta N o hasta que no haya. Si no llego a N, DEVUELVE
+    los que tomo (el enunciado dice "sin tomar ningun papel"). Vuelve a su
+    esquina y libera. Si consiguio N, los deposita en su esquina de origen.
+  - "8 intentos SEGUIDOS": el contador de fallos vuelve a 0 cada vez que
+    un intento sale bien.
+  - Areas: avenidas 5 y 10 y esquinas de los consumidores: privadas. }
+procesos
+  proceso irADepositar(E cant: numero)
+  { Deposita "cant" papeles en (50,50) y vuelve a donde estaba. }
+  variables
+    av, ca: numero
+  comenzar
+    av := PosAv
+    ca := PosCa
+    BloquearEsquina(50, 50)
+    Pos(50, 50)
+    repetir cant
+      depositarPapel
+    Pos(av, ca)
+    LiberarEsquina(50, 50)
+  fin
+  proceso procesarEsquina(ES cant: numero)
+  { Junta los papeles de la esquina; cada vez que completa 5, los lleva. }
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      cant := cant + 1
+      si (cant = 5)
+        irADepositar(5)
+        cant := 0
+  fin
+  proceso intentar(ES exito: boolean)
+  { Un intento del consumidor. Si no hay suficientes, no se lleva nada. }
+  variables
+    n, tomados, avIni, caIni: numero
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    Random(n, 2, 5)
+    tomados := 0
+    BloquearEsquina(50, 50)
+    Pos(50, 50)
+    mientras (HayPapelEnLaEsquina & (tomados < n))
+      tomarPapel
+      tomados := tomados + 1
+    si (tomados = n)
+      exito := V
+    sino
+      exito := F
+      repetir tomados           { devuelve lo que habia tomado }
+        depositarPapel
+    Pos(avIni, caIni)
+    LiberarEsquina(50, 50)
+    si (exito)
+      repetir n                 { los deja en su esquina de origen }
+        depositarPapel
+  fin
+areas
+  av5: AreaP(5,1,5,100)
+  av10: AreaP(10,1,10,100)
+  esqC1: AreaP(11,1,11,1)
+  esqC2: AreaP(12,1,12,1)
+  deposito: AreaC(50,50,50,50)
+robots
+  robot productor
+  variables
+    cant: numero
+  comenzar
+    cant := 0
+    repetir 99
+      procesarEsquina(cant)
+      mover
+    procesarEsquina(cant)
+  fin
+  robot consumidor
+  variables
+    fallos: numero
+    exito: boolean
+  comenzar
+    fallos := 0
+    mientras (fallos < 8)
+      intentar(exito)
+      si (exito)
+        fallos := 0
+      sino
+        fallos := fallos + 1
+  fin
+variables
+  p1, p2: productor
+  c1, c2: consumidor
+comenzar
+  AsignarArea(p1, av5)
+  AsignarArea(p2, av10)
+  AsignarArea(c1, esqC1)
+  AsignarArea(c2, esqC2)
+  AsignarArea(p1, deposito)
+  AsignarArea(p2, deposito)
+  AsignarArea(c1, deposito)
+  AsignarArea(c2, deposito)
+  Iniciar(p1, 5, 1)
+  Iniciar(p2, 10, 1)
+  Iniciar(c1, 11, 1)
+  Iniciar(c2, 12, 1)
+fin

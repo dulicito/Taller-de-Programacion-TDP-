@@ -1,0 +1,120 @@
+programa P5ej4
+{ ENUNCIADO - Practica 5, Ejercicio 4 (2026):
+  Tres robots floreros tienen 8 intentos en total para juntar todas las
+  flores dentro del cuadrante comprendido entre las esquinas (40,40) y
+  (60,60). Para ello, en cada intento un robot fiscalizador indicara a un
+  robot aleatorio la esquina a la que debe dirigirse. El fiscalizador
+  calculara esta esquina de manera aleatoria. Al completarse los 8
+  intentos, los robots floreros deberan depositar todas las flores juntadas
+  en la esquina (10,10), y el robot fiscalizador debera informar la
+  cantidad total de flores juntadas por los robots.
+  Los robots floreros inician en las esquinas (1,1), (2,1) y (3,1)
+  respectivamente, y el fiscalizador en la (4,1). }
+
+{ RESOLUCION (MASTER/SLAVE):
+  - En cada uno de los 8 intentos el fiscalizador sortea robot (1..3) y
+    esquina, y le manda: V (hay intento), avenida, calle. Al terminar los 8
+    le manda F a los 3. Los mensajes de un mismo emisor a un mismo receptor
+    llegan en orden, asi que el F llega despues de todos los intentos de
+    ese robot.
+  - El fiscalizador no espera a que terminen cada intento: varios floreros
+    pueden trabajar a la vez y les puede tocar la misma esquina -> se
+    bloquea la esquina sorteada (bloquear, ir, juntar, volver, liberar).
+  - Con el F, cada florero deposita sus flores en (10,10) (bloqueando, ya
+    que pueden llegar varios juntos) y le manda su cantidad al
+    fiscalizador. El fiscalizador solo suma: recibe 3 cantidades con *, sin
+    ids.
+  - Un florero al que nunca le toco un intento deposita 0 y manda 0: el
+    fiscalizador igual recibe los 3 mensajes que espera.
+  - AREAS: el cuadrante y (10,10) los usan los 3 floreros y no el
+    fiscalizador -> AreaPC. Las esquinas de inicio son privadas. }
+procesos
+  proceso enviarIntento(E r: numero; E av: numero; E ca: numero)
+  comenzar
+    si (r = 1)
+      EnviarMensaje(V, f1)
+      EnviarMensaje(av, f1)
+      EnviarMensaje(ca, f1)
+    sino
+      si (r = 2)
+        EnviarMensaje(V, f2)
+        EnviarMensaje(av, f2)
+        EnviarMensaje(ca, f2)
+      sino
+        EnviarMensaje(V, f3)
+        EnviarMensaje(av, f3)
+        EnviarMensaje(ca, f3)
+  fin
+areas
+  cuadrante: AreaPC(40,40,60,60)
+  deposito: AreaPC(10,10,10,10)
+  esq1: AreaP(1,1,1,1)
+  esq2: AreaP(2,1,2,1)
+  esq3: AreaP(3,1,3,1)
+  esqFiscal: AreaP(4,1,4,1)
+robots
+  robot florero
+  variables
+    av, ca, avIni, caIni, cant: numero
+    hay: boolean
+  comenzar
+    avIni := PosAv
+    caIni := PosCa
+    cant := 0
+    RecibirMensaje(hay, fisc)
+    mientras (hay)
+      RecibirMensaje(av, fisc)
+      RecibirMensaje(ca, fisc)
+      BloquearEsquina(av, ca)
+      Pos(av, ca)
+      mientras (HayFlorEnLaEsquina)
+        tomarFlor
+        cant := cant + 1
+      Pos(avIni, caIni)
+      LiberarEsquina(av, ca)
+      RecibirMensaje(hay, fisc)
+    BloquearEsquina(10, 10)
+    Pos(10, 10)
+    repetir cant
+      depositarFlor
+    Pos(avIni, caIni)
+    LiberarEsquina(10, 10)
+    EnviarMensaje(cant, fisc)
+  fin
+  robot fiscalizador
+  variables
+    r, av, ca, cant, total: numero
+  comenzar
+    repetir 8
+      Random(r, 1, 3)
+      Random(av, 40, 60)
+      Random(ca, 40, 60)
+      enviarIntento(r, av, ca)
+    EnviarMensaje(F, f1)
+    EnviarMensaje(F, f2)
+    EnviarMensaje(F, f3)
+    total := 0
+    repetir 3
+      RecibirMensaje(cant, *)
+      total := total + cant
+    Informar('TotalFlores', total)
+  fin
+variables
+  f1, f2, f3: florero
+  fisc: fiscalizador
+comenzar
+  AsignarArea(f1, cuadrante)
+  AsignarArea(f2, cuadrante)
+  AsignarArea(f3, cuadrante)
+  AsignarArea(f1, deposito)
+  AsignarArea(f2, deposito)
+  AsignarArea(f3, deposito)
+  AsignarArea(f1, esq1)
+  AsignarArea(f2, esq2)
+  AsignarArea(f3, esq3)
+  AsignarArea(fisc, esqFiscal)
+  Iniciar(f1, 1, 1)
+  Iniciar(f2, 2, 1)
+  Iniciar(f3, 3, 1)
+  Iniciar(fisc, 4, 1)
+fin

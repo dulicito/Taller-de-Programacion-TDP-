@@ -1,0 +1,97 @@
+programa P4ej3a
+{ ENUNCIADO - Practica 4, Ejercicio 3: Sincronizacion barrera (2026):
+  Tres robots papeleros deben vaciar de papeles su avenida, comenzando por
+  la calle 1 y terminando en la calle 100. El trabajo lo deben realizar
+  todos juntos y en etapas: los robots inician juntos y cuando todos
+  completan una etapa del trabajo pueden avanzar a la siguiente, lo que
+  significa que para poder pasar de etapa los robots deben esperar que
+  todos hayan completado la etapa en curso. Implemente el programa
+  considerando que cada robot completa una etapa cada 5 esquinas.
+  a) Resuelva considerando un robot coordinador cuya unica tarea es asignar
+     identificadores a cada robot.
+  b) Resuelva considerando un robot coordinador cuya tarea es habilitar el
+     inicio de las etapas.
+  Los robots inician en las esquinas (1,1), (2,1) y (3,1) respectivamente y
+  el coordinador en la esquina (4,1). }
+
+{ RESOLUCION a) BARRERA SIN COORDINADOR (entre pares):
+  - 100 esquinas / 5 = 20 etapas. Etapa k = esquinas 5k-4 .. 5k.
+  - Al terminar una etapa, cada robot avisa a LOS OTROS DOS y espera DOS
+    avisos (con *, en cualquier orden). Recien entonces avanza a la primera
+    esquina de la etapa siguiente.
+  - Para saber quienes son "los otros dos", cada robot necesita su id: esa
+    es la unica tarea del coordinador.
+  - No se mezclan avisos de etapas distintas: nadie puede adelantarse mas de
+    una etapa, porque para pasar necesita el aviso de todos, incluido el
+    robot mas lento.
+  - Despues de la etapa 20 no hace falta barrera: el trabajo termino.
+  - Inicio "juntos": todos arrancan apenas reciben su id.
+  - Areas: cada avenida es privada. Sin bloqueos. }
+procesos
+  proceso limpiar
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+  fin
+  proceso etapa
+  { 5 esquinas: procesa y avanza 4 veces, y procesa la quinta. }
+  comenzar
+    repetir 4
+      limpiar
+      mover
+    limpiar
+  fin
+  proceso barrera(E id: numero)
+  { Avisa a los otros dos que termino la etapa y espera sus dos avisos. }
+  variables
+    ok: boolean
+  comenzar
+    si (id = 1)
+      EnviarMensaje(V, r2)
+      EnviarMensaje(V, r3)
+    sino
+      si (id = 2)
+        EnviarMensaje(V, r1)
+        EnviarMensaje(V, r3)
+      sino
+        EnviarMensaje(V, r1)
+        EnviarMensaje(V, r2)
+    RecibirMensaje(ok, *)
+    RecibirMensaje(ok, *)
+  fin
+areas
+  av1: AreaP(1,1,1,100)
+  av2: AreaP(2,1,2,100)
+  av3: AreaP(3,1,3,100)
+  esqCoord: AreaP(4,1,4,1)
+robots
+  robot papelero
+  variables
+    id: numero
+  comenzar
+    RecibirMensaje(id, coord)
+    etapa
+    repetir 19
+      barrera(id)
+      mover
+      etapa
+  fin
+  robot coordinador
+  comenzar
+    EnviarMensaje(1, r1)
+    EnviarMensaje(2, r2)
+    EnviarMensaje(3, r3)
+  fin
+variables
+  r1, r2, r3: papelero
+  coord: coordinador
+comenzar
+  AsignarArea(r1, av1)
+  AsignarArea(r2, av2)
+  AsignarArea(r3, av3)
+  AsignarArea(coord, esqCoord)
+  Iniciar(r1, 1, 1)
+  Iniciar(r2, 2, 1)
+  Iniciar(r3, 3, 1)
+  Iniciar(coord, 4, 1)
+fin

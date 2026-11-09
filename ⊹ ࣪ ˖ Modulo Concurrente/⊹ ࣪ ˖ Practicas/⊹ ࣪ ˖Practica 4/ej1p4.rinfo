@@ -1,0 +1,141 @@
+programa P4ej1
+{ ENUNCIADO - Practica 4, Ejercicio 1: Clientes y Servidores (2026):
+  Existe un robot que sirve de flores a tres robots clientes. Cada cliente
+  solicita al servidor que le deposite en su esquina siguiente una cantidad
+  de flores aleatoria (entre 1 y 4). Por ejemplo, si el cliente se
+  encuentra en la esquina (2,1) le solicitara que coloque x cantidad de
+  flores en la esquina (2,2).
+  Cuando el robot servidor deposita las flores en la esquina solicitada, el
+  cliente las junta y las deposita una a una a lo largo de la avenida en la
+  que se encuentra.
+  El programa finaliza cuando todos los robots clientes completan su
+  avenida. Asuma que el robot servidor tiene flores suficientes en su bolsa.
+  El robot servidor se inicia en la esquina (100,100).
+  Los robots clientes inician en las esquinas (1,1), (2,1) y (3,1).
+  Protocolo Cliente/Servidor:
+  
+  Cliente: INICIO: calcularRandom flores / Enviar ID al servidor / Enviar
+  cantFlores al servidor / Enviar mi Avenida actual / Enviar Calle
+  siguiente / Esperar ACK del servidor / Ir a la esquina Avenida,Calle /
+  JuntarFlores / Volver a la esquina / Avanzar dejando flores / Si llegue a
+  la avenida 100: enviar 0 al servidor, sino volver a INICIO.
+  Servidor: INICIO: Enviar ID a los clientes / Recibir ID / Recibir N
+  Flores de ID / si (flores <> 0): recibir avenida de ID, recibir calle de
+  ID, pos(avenida,calle), depositar N flores, volver a (100,100), enviar
+  ACK a robot ID, volver a INICIO / sino: contar un robot terminado, si
+  terminaron los 3 robots terminar. }
+
+{ RESOLUCION (modelo CLIENTE/SERVIDOR, siguiendo el protocolo dado):
+  - El servidor asigna los ids. El cliente pide (id, N, avenida, calle
+    siguiente) y ESPERA el ACK: recien cuando lo recibe va a buscar las
+    flores. Mientras el servidor deposita, el cliente esta en su esquina
+    (la anterior), asi que nunca estan en la misma esquina: NO hace falta
+    bloquear. El servidor atiende de a un pedido y manda el ACK cuando ya
+    volvio a (100,100).
+  - El servidor recibe el id con * y el resto de los datos DE ESE cliente
+    (patron ID + dato). N = 0 significa "termine".
+  - "Avanzar dejando flores": desde su esquina, el cliente avanza y deja
+    una flor en cada esquina siguiente. La proxima solicitud es para la
+    esquina siguiente a donde quedo.
+  - "Si llegue a la avenida 100" = si llego al final de su avenida (calle
+    100). SUPUESTO: si al llegar a la calle 100 todavia le quedan flores,
+    las deja todas ahi (no hay mas esquinas en la avenida).
+  - AREAS: cada avenida de cliente la usan ese cliente y el servidor
+    (2 de 4 robots) -> AreaPC. (100,100) es privada del servidor. }
+procesos
+  proceso enviarA(E id: numero; E valor: numero)
+  comenzar
+    si (id = 1)
+      EnviarMensaje(valor, c1)
+    sino
+      si (id = 2)
+        EnviarMensaje(valor, c2)
+      sino
+        EnviarMensaje(valor, c3)
+  fin
+  proceso recibirDe(E id: numero; ES valor: numero)
+  comenzar
+    si (id = 1)
+      RecibirMensaje(valor, c1)
+    sino
+      si (id = 2)
+        RecibirMensaje(valor, c2)
+      sino
+        RecibirMensaje(valor, c3)
+  fin
+  proceso avanzarDejandoFlores
+  { Deja una flor en cada esquina siguiente mientras tenga flores. }
+  comenzar
+    mientras (HayFlorEnLaBolsa & (PosCa < 100))
+      mover
+      depositarFlor
+    mientras (HayFlorEnLaBolsa)     { solo pasa si llego a la calle 100 }
+      depositarFlor
+  fin
+areas
+  avCliente1: AreaPC(1,1,1,100)
+  avCliente2: AreaPC(2,1,2,100)
+  avCliente3: AreaPC(3,1,3,100)
+  esqServidor: AreaP(100,100,100,100)
+robots
+  robot cliente
+  variables
+    id, n, av, ca, sig, ack: numero
+  comenzar
+    RecibirMensaje(id, serv)
+    mientras (PosCa < 100)
+      Random(n, 1, 4)
+      av := PosAv
+      ca := PosCa
+      sig := ca + 1
+      EnviarMensaje(id, serv)
+      EnviarMensaje(n, serv)
+      EnviarMensaje(av, serv)
+      EnviarMensaje(sig, serv)
+      RecibirMensaje(ack, serv)     { espera que el servidor haya depositado }
+      Pos(av, sig)
+      mientras (HayFlorEnLaEsquina)
+        tomarFlor
+      Pos(av, ca)                   { vuelve a su esquina }
+      avanzarDejandoFlores
+    EnviarMensaje(id, serv)         { completo la avenida: avisa con 0 }
+    EnviarMensaje(0, serv)
+  fin
+  robot servidor
+  variables
+    id, n, av, ca, terminados: numero
+  comenzar
+    EnviarMensaje(1, c1)
+    EnviarMensaje(2, c2)
+    EnviarMensaje(3, c3)
+    terminados := 0
+    mientras (terminados < 3)
+      RecibirMensaje(id, *)
+      recibirDe(id, n)
+      si (n <> 0)
+        recibirDe(id, av)
+        recibirDe(id, ca)
+        Pos(av, ca)
+        repetir n
+          depositarFlor
+        Pos(100, 100)
+        enviarA(id, 1)              { ACK }
+      sino
+        terminados := terminados + 1
+  fin
+variables
+  c1, c2, c3: cliente
+  serv: servidor
+comenzar
+  AsignarArea(c1, avCliente1)
+  AsignarArea(c2, avCliente2)
+  AsignarArea(c3, avCliente3)
+  AsignarArea(serv, avCliente1)
+  AsignarArea(serv, avCliente2)
+  AsignarArea(serv, avCliente3)
+  AsignarArea(serv, esqServidor)
+  Iniciar(c1, 1, 1)
+  Iniciar(c2, 2, 1)
+  Iniciar(c3, 3, 1)
+  Iniciar(serv, 100, 100)
+fin

@@ -1,0 +1,78 @@
+programa P4ej3b
+{ ENUNCIADO - Practica 4, Ejercicio 3 b) (2026):
+  Resuelva considerando un robot coordinador cuya tarea es habilitar el
+  inicio de las etapas. (Mismo problema que el inciso a: 3 papeleros en las
+  avenidas 1, 2 y 3, etapas de 5 esquinas; robots en (1,1), (2,1), (3,1) y
+  coordinador en (4,1).) }
+
+{ RESOLUCION b) BARRERA CON COORDINADOR:
+  - El coordinador da la largada: le manda V a los 3 ("inician juntos").
+  - Al terminar cada etapa, cada robot le avisa SOLO al coordinador y espera
+    su habilitacion. El coordinador espera los 3 avisos (con *) y recien
+    entonces habilita a los 3 para la etapa siguiente.
+  - Comparado con a): los robots no necesitan ids ni conocerse entre si.
+    Con 3 robots, los dos usan 6 mensajes por etapa (aca 3 avisos + 3
+    habilitaciones; en a, cada robot avisa a 2). Con N robots el
+    coordinador usa 2N y la version entre pares N(N-1), asi que con mas
+    robots conviene el coordinador.
+  - Areas: cada avenida es privada. Sin bloqueos. }
+procesos
+  proceso limpiar
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+  fin
+  proceso etapa
+  comenzar
+    repetir 4
+      limpiar
+      mover
+    limpiar
+  fin
+  proceso habilitarTodos
+  comenzar
+    EnviarMensaje(V, r1)
+    EnviarMensaje(V, r2)
+    EnviarMensaje(V, r3)
+  fin
+areas
+  av1: AreaP(1,1,1,100)
+  av2: AreaP(2,1,2,100)
+  av3: AreaP(3,1,3,100)
+  esqCoord: AreaP(4,1,4,1)
+robots
+  robot papelero
+  variables
+    ok: boolean
+  comenzar
+    RecibirMensaje(ok, coord)     { largada }
+    etapa
+    repetir 19
+      EnviarMensaje(V, coord)     { termine la etapa }
+      RecibirMensaje(ok, coord)   { espera la habilitacion }
+      mover
+      etapa
+  fin
+  robot coordinador
+  variables
+    ok: boolean
+  comenzar
+    habilitarTodos                { largada }
+    repetir 19
+      repetir 3
+        RecibirMensaje(ok, *)
+      habilitarTodos
+  fin
+variables
+  r1, r2, r3: papelero
+  coord: coordinador
+comenzar
+  AsignarArea(r1, av1)
+  AsignarArea(r2, av2)
+  AsignarArea(r3, av3)
+  AsignarArea(coord, esqCoord)
+  Iniciar(r1, 1, 1)
+  Iniciar(r2, 2, 1)
+  Iniciar(r3, 3, 1)
+  Iniciar(coord, 4, 1)
+fin

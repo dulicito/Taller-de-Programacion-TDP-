@@ -1,0 +1,115 @@
+programa P5ej3
+{ ENUNCIADO - Practica 5, Ejercicio 3 (2026):
+  Dos robots recolectores avanzan por las calles 3 y 4 respectivamente
+  juntando todas las flores a su paso. Cada esquina tiene a lo sumo una
+  flor. Cada vez que juntan 10 flores o que avanzan 15 esquinas, deberan
+  vaciar de flores su bolsa en el deposito localizado en la esquina
+  (10,10).
+  Cada vez que se depositan flores en el deposito, un robot cosechador
+  debera juntar dichas flores.
+  Cuando ambos recolectores hayan completado sus calles, el robot
+  cosechador debera informar la cantidad de flores recolectadas.
+  Los recolectores inician en la esquina (1,3) y (1,4), y el cosechador en
+  la esquina (1,5). }
+
+{ RESOLUCION (PRODUCTOR/CONSUMIDOR con aviso por mensaje):
+  - "A lo sumo una flor": se usa si (no mientras).
+  - Dos contadores: flores juntadas y esquinas recorridas desde el ultimo
+    vaciado. Cuando flores = 10 o esquinas = 15, se vacia la bolsa en
+    (10,10) y ambos contadores vuelven a 0. Si se cumplieron las 15
+    esquinas pero no junto ninguna flor, no hay nada que vaciar y no viaja.
+  - Al terminar la calle, si le quedan flores tambien las deposita (asi el
+    cosechador cuenta todas).
+  - (10,10) la usan los 3 robots (todos) -> AreaC y se bloquea siempre.
+  - "Cada vez que se depositan flores... el cosechador debera juntar dichas
+    flores": despues de depositar y de VOLVER a su calle, el recolector le
+    avisa al cosechador con V. Al terminar su calle avisa con F.
+  - El cosechador espera mensajes hasta recibir los 2 F. Con cada V
+    bloquea (10,10), junta todo lo que hay, vuelve y libera. Si junta en
+    una visita las flores de dos depositos, la visita siguiente encuentra
+    la esquina vacia: el total igual queda bien.
+  - Areas: calles 3 y 4 y la esquina (1,5): privadas. }
+procesos
+  proceso vaciarBolsa(ES f: numero)
+  { Deposita las f flores en (10,10), vuelve a la calle y avisa. }
+  variables
+    av, ca: numero
+  comenzar
+    av := PosAv
+    ca := PosCa
+    BloquearEsquina(10, 10)
+    Pos(10, 10)
+    repetir f
+      depositarFlor
+    Pos(av, ca)
+    LiberarEsquina(10, 10)
+    EnviarMensaje(V, cos)         { avisa despues de salir del deposito }
+    f := 0
+  fin
+  proceso procesarEsquina(ES f: numero; ES e: numero)
+  comenzar
+    si (HayFlorEnLaEsquina)
+      tomarFlor
+      f := f + 1
+    e := e + 1
+    si ((f = 10) | (e = 15))
+      si (f > 0)
+        vaciarBolsa(f)
+      e := 0
+  fin
+areas
+  calle3: AreaP(1,3,100,3)
+  calle4: AreaP(1,4,100,4)
+  esqCos: AreaP(1,5,1,5)
+  deposito: AreaC(10,10,10,10)
+robots
+  robot recolector
+  variables
+    f, e: numero
+  comenzar
+    derecha
+    f := 0
+    e := 0
+    repetir 99
+      procesarEsquina(f, e)
+      mover
+    procesarEsquina(f, e)
+    si (f > 0)
+      vaciarBolsa(f)
+    EnviarMensaje(F, cos)         { termino su calle }
+  fin
+  robot cosechador
+  variables
+    total, terminados: numero
+    hayDeposito: boolean
+  comenzar
+    total := 0
+    terminados := 0
+    mientras (terminados < 2)
+      RecibirMensaje(hayDeposito, *)
+      si (hayDeposito)
+        BloquearEsquina(10, 10)
+        Pos(10, 10)
+        mientras (HayFlorEnLaEsquina)
+          tomarFlor
+          total := total + 1
+        Pos(1, 5)
+        LiberarEsquina(10, 10)
+      sino
+        terminados := terminados + 1
+    Informar('FloresCosechadas', total)
+  fin
+variables
+  rec1, rec2: recolector
+  cos: cosechador
+comenzar
+  AsignarArea(rec1, calle3)
+  AsignarArea(rec2, calle4)
+  AsignarArea(cos, esqCos)
+  AsignarArea(rec1, deposito)
+  AsignarArea(rec2, deposito)
+  AsignarArea(cos, deposito)
+  Iniciar(rec1, 1, 3)
+  Iniciar(rec2, 1, 4)
+  Iniciar(cos, 1, 5)
+fin
