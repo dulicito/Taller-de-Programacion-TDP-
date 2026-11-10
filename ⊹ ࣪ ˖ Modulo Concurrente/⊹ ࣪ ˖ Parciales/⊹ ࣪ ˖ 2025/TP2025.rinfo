@@ -1,0 +1,201 @@
+{
+# Módulo Programación Concurrente – Turno P
+
+**IMPORTANTE:** Utilice apellido_nombre como nombre del programa y como nombre del archivo.
+
+Tres robots recolectores deben coordinarse para recolectar todos los papeles de la calle 2, desde las avenidas 1 a la 63. Para ello, el primer robot realiza un tramo de 20 esquinas, cuando termina avisa al segundo robot para que realice el segundo tramo de 21 esquinas, y cuando este finaliza avisa al tercer robot para que realice el tramo final de 22 esquinas. Además, luego de realizar cada tramo, los robots deben depositar de a uno los papeles juntados en la esquina (3,20).
+
+Una vez que los 3 recolectores han finalizado, un robot jefe debe avisar al robot que juntó menos papeles durante su tramo, que recoja los papeles que fueron depositados en la esquina (3,20).
+
+
+Cada robot recolector inicia al comienzo de su tramo. El robot jefe inicia en la esquina (2,1).
+
+
+------------------------------------------------------------------
+RECOLECTOR
+  recibir mi id del jefe
+  si no soy R1:  esperar aviso del anterior        ← passing the baton
+  recorrer mi tramo (19+id esquinas) juntando papeles
+  si no soy R3:  avisar al siguiente                ← ANTES de depositar
+  depositar de a uno en (3,20)                      ← bloqueo por papel
+  avisar al jefe: id, cantidad
+  recibir respuesta del jefe
+  si me toca:  ir a (3,20), juntar todo, volver     ← sin bloqueo: ya nadie deposita
+
+JEFE
+  mandar ids
+  repetir 3:  recibir id (*) y cantidad de ESE; quedarme con el mínimo
+  mandar V al mínimo y F a los otros dos
+  
+}
+
+
+
+programa TP2025
+
+procesos
+  proceso EsperarTurno(E id:numero)
+  variables
+    ok:boolean
+  comenzar
+    si (id=2)
+      RecibirMensaje(ok,R1)
+    sino
+      si (id=3)
+        RecibirMensaje(ok,R2)
+  fin
+  
+  proceso JuntarPapeles(ES pap:numero)
+  comenzar
+    mientras HayPapelEnLaEsquina
+      tomarPapel
+      pap:= pap+1
+  fin
+  
+  proceso Tramo(E esquinas:numero; ES pap:numero)
+  comenzar
+    repetir (esquinas-1)
+      JuntarPapeles(pap)
+      mover
+    JuntarPapeles(pap){ultima esquina del tramo }
+  fin
+  
+  proceso PasarTurno (E id:numero)
+  comenzar
+    si (id=1)
+      EnviarMensaje(V,R2)
+    sino 
+      si (id=2)
+        EnviarMensaje(V,R3)
+  fin
+  
+  proceso DepositarDeAUno(E pap:numero)
+  variables
+    av,ca:numero
+  comenzar
+    av:= PosAv
+    ca:= PosCa
+    repetir pap
+      BloquearEsquina(3,20)
+      Pos(3,20)
+      depositarPapel
+      Pos(av,ca)
+      LiberarEsquina(3,20)
+  fin
+  
+  proceso RecogerDeposito
+  variables
+    av,ca:numero
+  comenzar
+    av:= PosAv
+    ca:= PosCa
+    Pos(3,20){ya nadie deposita, no se bloquea}
+    mientras HayPapelEnLaEsquina
+      tomarPapel
+    Pos(av,ca)
+  fin
+  
+{------------------------------------------------------------------}
+
+  
+  proceso EnviarIds
+  comenzar
+    EnviarMensaje(1,R1)
+    EnviarMensaje(2,R2)
+    EnviarMensaje(3,R3)
+  fin
+  
+  proceso CalcularMinimo(ES idMin:numero)
+  variables
+    id,pap,min:numero
+  comenzar
+    min:= 9999
+    repetir 3{ robots 3}
+      RecibirMensaje(id,*)
+      si (id=1)
+        RecibirMensaje(pap,R1)
+      sino 
+        si (id=2)
+          RecibirMensaje(pap,R2)
+        sino
+          RecibirMensaje(pap,R3)
+      si (pap<min)
+        min:= pap
+        idMin:= id
+  fin
+  
+  proceso AvisarMinimo(E idMin:numero)
+  comenzar
+    si (idMin=1)
+      EnviarMensaje(V,R1)
+      EnviarMensaje(F,R2)
+      EnviarMensaje(F,R3)
+    sino
+      si (idMin=2)
+        EnviarMensaje(V,R2)
+        EnviarMensaje(F,R1)
+        EnviarMensaje(F,R3)
+      sino 
+        EnviarMensaje(V,R3)
+        EnviarMensaje(F,R1)
+        EnviarMensaje(F,R2)
+  fin
+{----------------------------------------------------------------}
+areas
+  area1: AreaP(1,2,20,2)
+  area2: AreaP(21,2,41,2)
+  area3: AreaP(42,2,63,2)
+  areaJ: AreaP(2,1,2,1)
+  deposito: AreaPC(3,20,3,20)
+  
+  
+robots
+  robot Recolector
+  variables
+    id,pap:numero
+    recoger:boolean
+  comenzar
+    derecha 
+    pap:= 0
+    RecibirMensaje(id,Rj)
+    EsperarTurno(id){R1 no espera}
+    Tramo(19+id,pap)
+    PasarTurno(id){avisa al siguiente antes de depositar}
+    DepositarDeAUno(pap)
+    EnviarMensaje(id,Rj)
+    EnviarMensaje(pap,Rj)
+    RecibirMensaje(recoger,Rj)
+    si (recoger)
+      RecogerDeposito
+  fin
+  
+  
+  robot Jefe
+  variables
+    idMin:numero
+  comenzar
+    EnviarIds
+    CalcularMinimo(idMin)
+    AvisarMinimo(idMin)
+  fin
+  
+  
+variables
+  Rj: Jefe
+  R1: Recolector
+  R2: Recolector
+  R3: Recolector
+  
+comenzar
+  AsignarArea(Rj,areaJ)
+  AsignarArea(R1,area1)
+  AsignarArea(R2,area2)
+  AsignarArea(R3,area3)
+  AsignarArea(R1,deposito)
+  AsignarArea(R2,deposito)
+  AsignarArea(R3,deposito)
+  Iniciar(Rj,2,1)
+  Iniciar(R1,1,2)
+  Iniciar(R2,21,2)
+  Iniciar(R3,42,2)
+fin
