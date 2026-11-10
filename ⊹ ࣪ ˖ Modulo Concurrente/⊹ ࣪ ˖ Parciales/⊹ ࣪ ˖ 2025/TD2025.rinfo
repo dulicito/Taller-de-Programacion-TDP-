@@ -1,0 +1,245 @@
+{# Módulo Programación Concurrente – Turno D
+
+**IMPORTANTE:** Utilice apellido_nombre como nombre del programa y como nombre 
+del archivo.
+
+Dos robots recolectores, A y B, deben coordinarse para recolectar todas las 
+flores de una escalera de 4 escalones, comenzando en la esquina (3,3). Cada 
+escalón del robot A tendrá un alto y un ancho aleatorios entre 2 y 5 esquinas, 
+y cada escalón del robot B tendrá un alto y un ancho aleatorios entre 3 y 9 
+esquinas.
+
+El robot A debe realizar un escalón, luego el robot B debe realizar el segundo 
+escalón, a su término el robot A hará el tercer escalón y finalmente el robot B 
+completará el cuarto escalón.
+
+Cada vez que un robot completa un escalón, debe depositar una de las flores en 
+la esquina (1,5), y a continuación un robot jefe debe juntar de una sola vez 
+todas las flores recién depositadas.
+
+Una vez completada la escalera, el robot jefe debe informar qué robot dejó 
+más flores en total en la esquina (1,5).
+
+El robot A inicia en la esquina (2,1), el robot B inicia en la esquina (3,1) 
+y el robot jefe en la esquina (4,1).
+
+
+
+
+RECOLECTOR (A o B)
+  recibir mi id del jefe
+  repetir 2 veces                     ← A hace escalones 1 y 3, B hace 2 y 4
+    si soy A y es mi primer turno:  ir a (3,3) y juntar ahí
+    si no:                          recibir (av, ca) del otro e ir ahí
+    hacer escalón (alto y ancho random) juntando flores
+    guardar dónde quedé y volver a casa      ← SALIR antes de avisar
+    si no soy el último:            mandar (av, ca) al otro
+    depositar de a una en (1,5)              ← bloqueo por flor
+    avisar al jefe: id, cantidad
+
+JEFE
+  mandar ids
+  repetir 4 veces
+    recibir id (*) y cantidad de ESE robot
+    sumar al total de ese robot
+    si cantidad > 0:  bloquear, ir, juntar todo, volver, liberar
+  informar el de mayor total
+  
+}
+programa TD2025
+
+procesos
+  proceso Izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+
+  proceso JuntarFlores(ES f:numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      f:= f+1
+  fin
+
+  proceso Escalon(E min:numero; E max:numero; ES f:numero)
+  variables
+    alto,ancho:numero
+  comenzar
+    Random(alto,min,max)
+    Random(ancho,min,max)
+    repetir alto 
+      mover
+      JuntarFlores(f)
+    derecha
+    repetir ancho
+      mover
+      JuntarFlores(f)
+    Izquierda
+  fin
+
+  proceso SalirDeLaEscalera(E avCasa:numero; E caCasa:numero;  ES av:numero; ES ca:numero)
+  comenzar
+    av:= PosAv
+    ca:= PosCa
+    Pos(avCasa,caCasa)
+  fin
+
+  proceso DepositarDeAUna(E f:numero)
+  variables
+    av,ca:numero
+  comenzar
+    av:= PosAv
+    ca:= PosCa
+    repetir f
+      BloquearEsquina(1,5)
+      Pos(1,5)
+      depositarFlor
+      Pos(av,ca)
+      LiberarEsquina(1,5)
+  fin
+
+
+  proceso AvisarJefe(E id:numero; E f:numero)
+  comenzar
+    EnviarMensaje(id,Rj)
+    EnviarMensaje(f,Rj)
+  fin
+
+
+{----------------------------------------------------------------------}
+  proceso EnviarIds
+  comenzar
+    EnviarMensaje(1,Ra)
+    EnviarMensaje(2,Rb)
+  fin
+  
+  proceso JuntarDeposito
+  comenzar
+    BloquearEsquina(1,5)
+    Pos(1,5)
+    mientras HayFlorEnLaEsquina {de una sola vez}
+      tomarFlor
+    Pos(4,1)
+    LiberarEsquina(1,5)
+  fin
+  
+  proceso AtenderDepositos (ES totA:numero; ES totB:numero)
+  variables
+    id,cant:numero
+  comenzar
+    repetir 4  {4 de escalones}
+      RecibirMensaje(id,*)
+      si (id =1)
+        RecibirMensaje(cant,Ra)
+        totA:= totA+cant
+      sino 
+        RecibirMensaje(cant,Rb)
+        totB:= totB+cant
+      si (cant > 0)
+        JuntarDeposito 
+  fin
+{--------------------------------------------------------------------}  
+areas
+  areaA: AreaP(2,1,2,1)
+  areaB: AreaP(3,1,3,1)
+  areaJ: AreaP(4,1,4,1)
+  escalera: AreaPC(3,3,31,31)
+  deposito: AreaC(1,5,1,5)
+  
+robots
+  robot RobotA
+  variables
+    id,f,av,ca:numero
+  comenzar
+    RecibirMensaje(id,Rj)
+    
+    {escalon 1}
+    f:= 0
+    Pos(3,3)
+    JuntarFlores(f) {esq inicial de la escalera}
+    Escalon(2,5,f)
+    SalirDeLaEscalera(2,1,av,ca)
+    EnviarMensaje(av,Rb)
+    EnviarMensaje(ca,Rb)
+    DepositarDeAUna(f)
+    AvisarJefe(id,f)
+    
+    
+    {escalon 3}
+    f:=0
+    RecibirMensaje(av,Rb)
+    RecibirMensaje(ca,Rb)
+    Pos(av,ca)
+    Escalon(2,5,f)
+    SalirDeLaEscalera(2,1,av,ca)
+    EnviarMensaje(av,Rb)
+    EnviarMensaje(ca,Rb)
+    DepositarDeAUna(f)
+    AvisarJefe(id,f)
+  fin
+  
+  robot RobotB
+  variables
+    id,f,av,ca:numero
+  comenzar
+    RecibirMensaje(id,Rj)
+    
+    {Escalon 2}
+    RecibirMensaje(av,Ra)
+    RecibirMensaje(ca,Ra)
+    Pos(av,ca)
+    Escalon(3,9,f)
+    SalirDeLaEscalera(3,1,av,ca)
+    EnviarMensaje(av,Ra)
+    EnviarMensaje(ca,Ra)
+    DepositarDeAUna(f)
+    AvisarJefe(id,f)
+    
+    
+    {Escalon 4}{ultimo escalon,no pasa msj }
+    f:= 0
+    RecibirMensaje(av,Ra)
+    RecibirMensaje(ca,Ra)
+    Pos(av,ca)
+    Escalon(3,9,f)
+    SalirDeLaEscalera(3,1,av,ca)
+    DepositarDeAUna(f)
+    AvisarJefe(id,f)
+  fin
+  
+  robot Jefe
+  variables
+    totA,totB:numero
+  comenzar
+    totA:= 0
+    totB:= 0
+    EnviarIds
+    AtenderDepositos(totA,totB)
+    si (totA > totB)
+      Informar(1)
+    sino 
+      si (totB < totA)
+        Informar(2)
+      sino
+        Informar(0){empate}
+  fin
+  
+variables
+  Rj:Jefe
+  Ra:RobotA
+  Rb:RobotB
+  
+comenzar
+  AsignarArea(Rj,areaJ)
+  AsignarArea(Ra,areaA)
+  AsignarArea(Rb,areaB)
+  AsignarArea(Ra,escalera)
+  AsignarArea(Rb,escalera)
+  AsignarArea(Ra,deposito)
+  AsignarArea(Rb,deposito)
+  AsignarArea(Rj,deposito)
+  Iniciar(Rj,4,1)
+  Iniciar(Ra,2,1)
+  Iniciar(Rb,3,1)
+fin
