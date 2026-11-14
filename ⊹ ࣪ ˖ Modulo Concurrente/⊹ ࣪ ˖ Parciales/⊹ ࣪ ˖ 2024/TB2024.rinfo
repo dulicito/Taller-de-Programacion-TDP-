@@ -1,0 +1,169 @@
+{# Turno B — Módulo Programación Concurrente
+
+**IMPORTANTE:** Utilice apellido_nombre como nombre del programa 
+y como nombre del archivo.
+
+Tres robots floreros realizan N intentos cada uno para recolectar 
+flores dentro del cuadrante comprendido entre las esquinas (10,10) y 
+(30,30). La cantidad de intentos de cada robot será determinada por 
+un robot fiscalizador de manera aleatoria entre 3 y 6. En cada intento, 
+los robots floreros vacían de flores una esquina al azar dentro del 
+cuadrante, luego depositan dichas de a una las flores en la esquina (5,5) 
+y a continuación regresan a su esquina original.
+
+Una vez que todos los robots floreros completaron sus intentos, el 
+robot fiscalizador debe juntar todas las flores de la esquina (5,5) 
+e informar qué robot logró juntar más flores entre todos sus intentos.
+
+Los robots floreros inician en las esquinas (1,1), (2,1) y (3,1), y 
+el fiscalizador en la esquina (9,9).}
+
+programa TB2024
+procesos
+{--------------------------------------------------------------------}
+{procesos floreros}
+
+        
+  proceso vaciaresquina(E a:numero; E c:numero; ES flores:numero)
+  variables
+    arandom,carandom:numero
+  comenzar
+    Random(arandom,10,30)
+    Random(carandom,10,30)
+    BloquearEsquina(arandom,carandom)
+    Pos(arandom,carandom)
+    mientras HayFlorEnLaEsquina
+      tomarFlor
+      flores:= flores+1
+    Pos(a,c)
+    LiberarEsquina(arandom,carandom)
+  fin
+  
+      
+  proceso depositardeauna(E flores:numero)
+  variables
+    av,ca:numero
+  comenzar
+    av:= PosAv
+    ca:= PosCa
+    repetir flores
+      BloquearEsquina(5,5)
+      Pos(5,5)
+      depositarFlor
+      Pos(av,ca)
+      LiberarEsquina(5,5)
+  fin
+{---------------------------------------------------------------------}
+{procesos fiscal }
+
+  proceso cargarIDS
+  comenzar
+    EnviarMensaje(1,f1)
+    EnviarMensaje(2,f2)
+    EnviarMensaje(3,f3)
+  fin
+  
+  proceso repartirintentos
+  variables
+    intento:numero
+  comenzar
+    Random(intento,3,6)
+    EnviarMensaje(intento,f1)
+    Random(intento,3,6)
+    EnviarMensaje(intento,f2)
+    Random(intento,3,6)
+    EnviarMensaje(intento,f3)
+  fin
+  
+  
+  {no bloqueo pq los demas robots no accederan a esta posicion}
+  proceso juntarfloresesquina55
+  comenzar
+    Pos(5,5)
+    mientras HayFlorEnLaEsquina
+      tomarFlor
+    Pos(9,9){vuelve a su esquina inicial }
+  fin
+  
+  proceso calcularmax(E cant:numero; E id:numero; ES max:numero; ES idmax:numero)
+  comenzar
+    si cant>max
+      max:= cant
+      idmax:= id
+  fin
+  
+  proceso quienjuntomas
+  variables
+    id,cant,max,idmax:numero
+  comenzar
+    max:= -9999
+    repetir 3
+      RecibirMensaje(id,*)
+      si id=1
+        RecibirMensaje(cant,f1)
+        calcularmax(cant,id,max,idmax)
+      sino 
+        si id=2
+          RecibirMensaje(cant,f2)
+          calcularmax(cant,id,max,idmax)
+        sino 
+          RecibirMensaje(cant,f3)
+          calcularmax(cant,id,max,idmax)
+    Informar("id max ",idmax)
+  fin
+  
+{---------------------------------------------------------------------}
+areas
+  cuadrante: AreaPC(10,10,30,30)
+  esquina:AreaC(5,5,5,5)
+  area1:AreaP(1,1,1,1)
+  area2:AreaP(2,1,2,1)
+  area3: AreaP(3,1,3,1)
+  areaf:AreaP(9,9,9,9)
+robots
+  robot florero
+  variables
+    id,intentos,a,c,flores,total,av,ca:numero
+  comenzar
+    av:= PosAv
+    ca:= PosCa
+    RecibirMensaje(id,f)
+    RecibirMensaje(intentos,f)
+    total:= 0
+    repetir intentos
+      flores:= 0
+      vaciaresquina(av,ca,flores)
+      depositardeauna(flores)
+      total:= total+flores
+    EnviarMensaje(id,f)
+    EnviarMensaje(total,f)
+  fin
+  
+  robot fiscal
+  comenzar
+    cargarIDS
+    repartirintentos
+    juntarfloresesquina55
+    quienjuntomas
+  fin
+  
+variables
+  f1,f2,f3:florero
+  f:fiscal
+comenzar
+  AsignarArea(f1,cuadrante)
+  AsignarArea(f1,esquina)
+  AsignarArea(f1,area1)
+  AsignarArea(f2,cuadrante)  
+  AsignarArea(f2,esquina)
+  AsignarArea(f2,area2)
+  AsignarArea(f3,cuadrante)
+  AsignarArea(f3,esquina) 
+  AsignarArea(f3,area3)
+  AsignarArea(f,areaf)
+  AsignarArea(f,esquina)
+  Iniciar(f1,1,1)
+  Iniciar(f2,2,1)
+  Iniciar(f3,3,1)
+  Iniciar(f,9,9)
+fin
