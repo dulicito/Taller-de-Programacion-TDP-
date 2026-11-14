@@ -1,0 +1,150 @@
+{# Turno A — Módulo Programación Concurrente
+
+**IMPORTANTE:** Utilice apellido_nombre como nombre del programa y como nombre del archivo.
+
+Tres robots floreros deben realizar escalones de 2x2 cada uno juntando todas 
+las flores. Un robot fiscalizador deberá indicar a cada robot cuántos escalones 
+deberá realizar, que calculará de manera aleatoria entre 1 y 5. Al finalizar 
+cada escalón, cada robot florero deberá depositar de a una las flores en el 
+depósito de flores ubicado en la esquina (99,99). Una vez que todos los robots 
+finalizaron sus escalones, el robot fiscalizador deberá informar la cantidad 
+total de escalones realizados en los que no se encontraron flores. 
+El fiscalizador inicia en la esquina (1,1), y los robots floreros inician en 
+las esquinas (2,1), (20,1) y (40,1) respectivamente.}
+
+
+programa TA2024
+procesos
+{procesos floreros}
+  
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  
+  proceso juntarflores(ES flores:numero)
+  comenzar
+    mientras HayFlorEnLaEsquina
+      tomarFlor
+      flores:= flores+1
+  fin
+  
+  proceso escalon(ES flores:numero)
+  comenzar
+    repetir 2
+      juntarflores(flores)
+      mover
+    derecha
+    repetir 2
+      juntarflores(flores)
+      mover
+    juntarflores(flores)
+    izquierda
+  fin
+  
+  {depositar de a una las flores en la esquina (99,99)}
+  proceso depositardeauna(E flores:numero)
+  variables
+    av,ca:numero
+  comenzar
+    av:= PosAv
+    ca:= PosCa
+    repetir flores 
+      BloquearEsquina(99,99)
+      Pos(99,99)
+      depositarFlor
+      Pos(av,ca)
+      LiberarEsquina(99,99)
+  fin
+  
+  
+{----------------------------------------------------------------}
+{proceso fiscal}
+  proceso cargarIDS
+  comenzar
+    EnviarMensaje(1,f1)
+    EnviarMensaje(2,f2)
+    EnviarMensaje(3,f3)
+  fin
+  
+  proceso escalonesvacios
+  variables
+    vacio,id,cant:numero
+  comenzar
+    vacio:= 0
+    repetir 3
+      RecibirMensaje(id,*)
+      si (id=1)
+        RecibirMensaje(cant,f1)
+        vacio:= vacio+cant
+      sino 
+        si id=2
+          RecibirMensaje(cant,f2)
+          vacio:= vacio+cant
+        sino 
+          RecibirMensaje(cant,f3)
+          vacio:= vacio+cant
+    Informar(vacio){cant de escalones vacios}
+  fin
+  
+  proceso enviarcantidades
+  variables
+    cant:numero
+  comenzar
+    Random(cant,1,5)
+    EnviarMensaje(cant,f1)
+    Random(cant,1,5)
+    EnviarMensaje(cant,f2)
+    Random(cant,1,5)
+    EnviarMensaje(cant,f3)
+  fin
+  
+{-------------------------------------------------------------}
+areas
+  esquina: AreaPC(99,99,99,99)
+  fiscal:AreaP(1,1,1,1)
+  area1: AreaP(2,1,12,11)
+  area2:AreaP(20,1,30,11)
+  area3:AreaP(40,1,50,11)
+robots
+  robot florero
+  variables
+    cant,id,vacio,flores:numero
+  comenzar
+    RecibirMensaje(id,f)
+    RecibirMensaje(cant,f)
+    vacio:= 0
+    repetir cant
+      flores:= 0
+      escalon(flores)
+      si flores=0
+        vacio:= vacio+1
+      depositardeauna(flores)
+    EnviarMensaje(id,f)
+    EnviarMensaje(vacio,f)  
+  fin
+  
+  robot fiscal 
+  comenzar
+    cargarIDS
+    enviarcantidades
+    escalonesvacios
+  fin
+  
+variables
+  f1,f2,f3:florero
+  f:fiscal
+comenzar
+  AsignarArea(f1,area1)
+  AsignarArea(f2,area2)
+  AsignarArea(f3,area3)
+  AsignarArea(f,fiscal)
+  AsignarArea(f1,esquina)
+  AsignarArea(f2,esquina)
+  AsignarArea(f3,esquina)
+  Iniciar(f1,2,1)
+  Iniciar(f2,20,1)
+  Iniciar(f3,40,1)
+  Iniciar(f,1,1)
+fin
