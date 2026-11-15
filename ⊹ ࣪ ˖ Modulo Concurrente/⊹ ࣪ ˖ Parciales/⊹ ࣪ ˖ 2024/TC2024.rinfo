@@ -1,0 +1,217 @@
+{# Turno C — Módulo Programación Concurrente
+
+**IMPORTANTE:** Utilice apellido_nombre como nombre del programa 
+y como nombre del archivo.
+
+Existen tres robots recolectores: dos floreros RF1 y RF2 que vacían 
+de flores sus respectivas avenidas y un robot papelero RP que vacía 
+de papeles una calle aleatoria entre 2 y 20 indicada por un robot 
+fiscalizador. Cuando los tres recolectores terminan su tarea, el 
+fiscalizador debe indicarle al que haya recolectado más elementos 
+que vuelva a su ubicación inicial. Las esquinas de inicio son: RF1 
+en (6,1), RF2 en (11,1), RP en (2,1) y el fiscalizador en (1,1).}
+
+
+programa TC2024
+procesos
+  {-------------------------------------------------------------}
+  {PROCESOS FLOREROS}
+  proceso agarrarflores(ES flores:numero)
+  comenzar
+    mientras HayFlorEnLaEsquina
+      tomarFlor
+      flores:= flores+1
+  fin
+  
+  proceso recorrerAv(ES flores:numero; E c:numero)
+  comenzar
+    repetir c
+      agarrarflores(flores)
+      mover
+  fin
+  
+
+  proceso tramoAv(ES flores:numero; E calle:numero)
+  comenzar
+    agarrarflores(flores)
+    BloquearEsquina(PosAv,calle)
+    mover
+    agarrarflores(flores)
+    mover 
+    LiberarEsquina(PosAv,calle)
+  fin
+  
+  {--------------------------------------------------------------}
+  {PROCESOS PAPELEROS}
+  
+  proceso agarrarpapeles(ES papeles:numero)
+  comenzar
+    mientras HayPapelEnLaEsquina
+      tomarPapel
+      papeles:= papeles+1
+  fin
+  
+  proceso recorrercalle(ES papeles:numero; E cant:numero)
+  comenzar
+    repetir cant
+      agarrarpapeles(papeles)
+      mover
+  fin  
+     
+  proceso tramocalle(ES papeles:numero; E calle:numero)
+  comenzar
+    agarrarpapeles(papeles)
+    BloquearEsquina(PosAv+1,calle)
+    mover
+    agarrarpapeles(papeles)
+    mover
+    LiberarEsquina(PosAv-1,calle)
+  fin
+  
+  {-------------------------------------------}
+  {PROCESO DE AMBOS}
+  
+  proceso ubicacioninicial( E av:numero; E ca:numero)
+  comenzar
+    Pos(av,ca)
+  fin
+  {--------------------------------------------------------------}
+  {PROCESO FISCAL }
+  proceso cargarIDS
+  comenzar
+    EnviarMensaje(1,rf1)
+    EnviarMensaje(2,rf2)
+    EnviarMensaje(3,rp)
+  fin
+  
+  proceso enviarcalle
+  variables
+    calle:numero
+  comenzar
+    Random(calle,2,20)
+    EnviarMensaje(calle,rp)
+    EnviarMensaje(calle,rf1)
+    EnviarMensaje(calle,rf2)
+  fin
+  
+  proceso calcularmax(E cant:numero; ES max:numero; ES maxid:numero; E id:numero)
+  comenzar
+    si cant>max
+      max:= cant
+      maxid:= id
+  fin
+  
+  proceso avisaralosrobots(E maxid:numero)
+  comenzar
+    si maxid=1
+      EnviarMensaje(V,rf1)
+      EnviarMensaje(F,rf2)
+      EnviarMensaje(F,rp)
+    sino 
+      si maxid=2
+        EnviarMensaje(V,rf2)
+        EnviarMensaje(F,rf1)
+        EnviarMensaje(F,rp)
+      sino 
+        EnviarMensaje(V,rp)
+        EnviarMensaje(F,rf1)
+        EnviarMensaje(F,rf2)
+  fin
+  
+  proceso maxelementoscargados
+  variables
+    max,id,cant,maxid:numero
+  comenzar
+    max:= -9999
+    repetir 3
+      RecibirMensaje(id,*)
+      si id=1
+        RecibirMensaje(cant,rf1)
+      sino 
+        si id=2
+          RecibirMensaje(cant,rf2)
+        sino 
+          RecibirMensaje(cant,rp)
+      calcularmax(cant,max,maxid,id)
+    avisaralosrobots(maxid)
+  fin
+  
+  {--------------------------------------------------------------}
+areas
+  areaf: AreaP(1,1,1,1)
+  arearobots: AreaPC(2,1,100,100)
+  {---------------------------------------------------------------}
+robots
+  robot florero
+  variables
+    av,ca,id,calle,flores,c:numero
+    ok:boolean
+  comenzar
+    RecibirMensaje(id,f)
+    RecibirMensaje(calle,f)
+    av:= PosAv
+    ca:= PosCa
+    c:=calle-2
+    flores:= 0
+    recorrerAv(flores,c)
+    tramoAv(flores,calle)
+    c:=99-calle
+    recorrerAv(flores,c)
+    agarrarflores(flores)
+    EnviarMensaje(id,f)
+    EnviarMensaje(flores,f)
+    RecibirMensaje(ok,f)
+    si ok
+      ubicacioninicial(av,ca)
+  fin
+  
+  robot papelero
+  variables
+    id,calle,av,ca,papeles,cantarecorrer:numero
+    ok:boolean
+  comenzar 
+    RecibirMensaje(id,f)
+    RecibirMensaje(calle,f)
+    av:= PosAv
+    ca:= PosCa
+    papeles:= 0
+    derecha
+    cantarecorrer:= 2{av6-av2-2}
+    recorrercalle(papeles,cantarecorrer)
+    tramocalle(papeles,calle)
+    {cant a recorrer igual}
+    recorrercalle(papeles,cantarecorrer)
+    tramocalle(papeles,calle)
+    {av99-av11}
+    cantarecorrer:= 99-11
+    recorrercalle(papeles,cantarecorrer)
+    agarrarpapeles(papeles)
+    EnviarMensaje(id,f)
+    EnviarMensaje(papeles,f)
+    RecibirMensaje(ok,f)
+    si ok
+      ubicacioninicial(av,ca)
+    
+  fin
+  
+  robot fiscal 
+  comenzar
+    cargarIDS
+    enviarcalle
+    maxelementoscargados
+  fin
+  
+variables
+  rf1,rf2:florero
+  rp:papelero
+  f:fiscal
+comenzar
+  AsignarArea(f, areaf)
+  AsignarArea(rf1,arearobots)
+  AsignarArea(rf2,arearobots)
+  AsignarArea(rp,arearobots)
+  Iniciar(rf1,6,1)
+  Iniciar(rf2,11,1)
+  Iniciar(rp,2,1)
+  Iniciar(f,1,1)
+fin
