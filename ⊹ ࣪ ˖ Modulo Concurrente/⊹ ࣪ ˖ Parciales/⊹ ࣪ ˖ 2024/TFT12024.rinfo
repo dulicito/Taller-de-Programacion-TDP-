@@ -1,0 +1,223 @@
+
+{# Turno F — Tema 1 — Módulo Concurrente
+
+**IMPORTANTE:** Utilice su apellido como nombre del programa y como nombre del archivo.
+
+Se organizó una competencia entre el equipo A y el equipo B. Cada equipo consta de
+dos robots que deben realizar por etapas el perímetro de un cuadrado de (10x10) como 
+muestra la figura, recogiendo todas las flores. Cuando el primer robot de cada equipo 
+completa su etapa (primera parte del recorrido) debe avisarle a su compañero para que 
+continúe con la segunda etapa. Además, cuando un robot finaliza su etapa debe depositar 
+de a una las flores juntadas en la esquina (20,20). Al finalizar la competencia, 
+un robot fiscalizador debe informar la cantidad de flores del equipo que juntó más 
+flores.
+
+El equipo A inicia en las esquinas (1,1) y (11,10). El equipo B inicia en (13,1) y 
+(23,10). El fiscalizador inicia en (30,1).
+
+**Referencia del diagrama:** Ejemplo donde un equipo (dos robots) completaron un 
+cuadrado de 10x10.}
+
+programa TFT12024
+procesos
+{PROCESOS FISCAL}
+  proceso cargarIDS
+  comenzar
+    EnviarMensaje(1,a1)
+    EnviarMensaje(2,a2)
+    EnviarMensaje(3,b1)
+    EnviarMensaje(4,b2)
+  fin  
+  
+  proceso equipomax(E equipoa:numero; E equipob:numero)
+  comenzar
+    si equipoa>equipob
+      Informar("el equipo a tiene mas flores ",equipoa)
+    sino 
+      Informar("el equipo b tiene mas flores ",equipob)
+
+  fin
+  
+  proceso informarequipomasflores
+  variables
+    equipoa,equipob,id,cant:numero
+  comenzar
+    equipoa:= 0
+    equipob:= 0
+    repetir 4
+      RecibirMensaje(id,*)
+      si id=1
+        RecibirMensaje(cant,a1)
+        equipoa:= equipoa+cant
+      sino 
+        si id=2
+          RecibirMensaje(cant,a2)
+          equipoa:= equipoa+cant
+        sino 
+          si id=3
+            RecibirMensaje(cant,b1)
+            equipob:= equipob+cant
+          sino 
+            RecibirMensaje(cant,b2)
+            equipob:= equipob+cant
+    equipomax(equipoa,equipob)           
+  fin
+{-----------------------------------------------------------------------------------------------------}
+{PROCESOS LADO1}
+  proceso tomarflores(ES flores:numero)
+  comenzar
+    mientras HayFlorEnLaEsquina
+      tomarFlor
+      flores:= flores+1
+  fin
+  
+  proceso lado(E esquinas:numero; ES flores:numero)
+  comenzar
+    repetir esquinas
+      tomarflores(flores)
+      mover
+  fin
+  
+  proceso recorrerlado1(ES flores:numero)
+  comenzar
+    lado(10,flores)
+    derecha
+    lado(10,flores)
+    tomarflores(flores)
+  fin
+  
+  proceso depositar2020(E flores:numero)
+  variables
+    av,ca:numero
+  comenzar
+    av:= PosAv
+    ca:= PosCa
+    repetir flores
+      BloquearEsquina(20,20)
+      
+      Pos(20,20)
+      depositarFlor
+      Pos(av,ca)
+      
+      LiberarEsquina(20,20)
+  fin
+  
+  proceso mandomsj(E id:numero;E ok:boolean)
+  comenzar
+    si id=1
+      EnviarMensaje(ok,a2)
+    sino
+      si id=2
+        EnviarMensaje(ok,a1)
+      sino 
+        si id=3
+          EnviarMensaje(ok,b2)
+        sino 
+          EnviarMensaje(ok,b1)
+  fin
+  
+  proceso recibomsj(E id:numero; ES ok:boolean)
+  comenzar
+    si id=1
+      RecibirMensaje(ok,a2)
+    sino   
+      si id=2
+        RecibirMensaje(ok,a1)
+      sino
+        si id=3
+          RecibirMensaje(ok,b2)
+        sino 
+          RecibirMensaje(ok,b1)
+  fin
+{-----------------------------------------------------------------------------------------------------}
+{PROCESO LADO2}  
+  
+  proceso recorrerlado2(ES flores:numero)
+  comenzar
+    derecha
+    derecha
+    lado(9,flores)
+    derecha
+
+    lado(9,flores)
+    tomarflores(flores)
+  fin
+  
+areas
+  {equipo A}
+  a1izq: AreaP(1,1,1,11)
+  a1arr: AreaP(2,11,11,11)
+  a2der: AreaP(11,1,11,10)
+  a2aba: AreaP(2,1,10,1)
+  {equipo B}
+  b1izq: AreaP(13,1,13,11)
+  b1arr: AreaP(14,11,23,11)
+  b2der: AreaP(23,1,23,10)
+  b2aba: AreaP(14,1,22,1)
+  areaf: AreaP(30,1,30,1)
+  deposito: AreaPC(20,20,20,20)
+  
+robots
+  robot lado1
+  variables
+    ok:boolean
+    id,flores:numero
+  comenzar
+    RecibirMensaje(id,f)
+    flores:= 0
+    recorrerlado1(flores)
+    ok:= V
+    mandomsj(id,ok)
+    depositar2020(flores)
+    EnviarMensaje(id,f)
+    EnviarMensaje(flores,f)
+  fin
+  
+  robot lado2
+  variables
+    id,flores:numero
+    ok:boolean
+  comenzar
+    RecibirMensaje(id,f)
+    flores:= 0
+    recibomsj(id,ok)
+    recorrerlado2(flores)
+    depositar2020(flores)
+    EnviarMensaje(id,f)
+    EnviarMensaje(flores,f)
+  fin
+  
+  robot fiscal
+  comenzar
+    cargarIDS
+    informarequipomasflores
+  fin
+  
+variables
+  a1,b1:lado1
+  a2,b2:lado2
+  f:fiscal 
+comenzar
+  AsignarArea(f,areaf)
+  AsignarArea(a1,a1izq)
+  AsignarArea(a1,a1arr)
+  AsignarArea(a2,a2der)
+  AsignarArea(a2,a2aba)
+  AsignarArea(b1,b1izq)
+  AsignarArea(b1,b1arr)
+  AsignarArea(b2,b2der)
+  AsignarArea(b2,b2aba)
+  AsignarArea(a1,deposito)
+  AsignarArea(a2,deposito)
+  AsignarArea(b1,deposito)
+  AsignarArea(b2,deposito)
+  Iniciar(a1, 1,1)
+  Iniciar(a2,11,10)
+  Iniciar(b1,13,1)
+  Iniciar(b2,23,10)
+  Iniciar(f,30,1)
+fin
+
+
+{asignar areas
+areas hacer }
