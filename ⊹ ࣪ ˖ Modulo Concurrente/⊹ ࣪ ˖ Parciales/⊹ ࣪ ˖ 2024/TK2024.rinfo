@@ -1,0 +1,174 @@
+
+{# Turno K — Módulo Programación Concurrente
+
+**IMPORTANTE:** Utilice apellido_nombre como nombre del programa y como 
+nombre del archivo.
+
+Tres robots deben realizar 3 cuadrados como se ejemplifica en la figura, 
+juntando todas las flores que encuentran a su paso. Para resolver el problema 
+se debe seguir un modelo de Cliente/Servidor. Cada uno de los 3 robots (Cliente) 
+debe solicitar a un robot Servidor un tamaño de cuadrado y luego realizar el 
+cuadrado de dicho tamaño. El Servidor determina aleatoriamente el tamaño entre 
+1 y 5. Cada robot, una vez completados los 3 cuadrados, debe depositar de a una 
+todas las flores juntadas en la esquina (50,50). Cuando los 3 robots hayan 
+depositado sus flores en (50,50), el robot Servidor deberá ir a (50,50) y juntar 
+todas las flores que haya en dicha esquina e informar la cantidad juntada.
+
+Los robots Clientes inician en las esquinas (1,1) y (8,1) y (15,1).
+
+El robot Servidor inicia en (22,1).
+
+**Referencia del diagrama:** Ejemplo donde 3 robots hacen 3 cuadrados de 
+tamaño aleatorio entre 1 y 10.}
+
+
+programa ejemplo
+procesos
+{PROCESOS SERVIDOR}
+  proceso cargarIDS
+  comenzar
+    EnviarMensaje(1,r1)
+    EnviarMensaje(2,r2)
+    EnviarMensaje(3,r3)
+  fin
+  
+  proceso mandartamanos
+  variables
+    terminados,id,tam:numero
+    ok:boolean
+  comenzar
+    terminados:= 0
+    mientras terminados < 3
+      RecibirMensaje(id,*)
+      si id=1
+        RecibirMensaje(ok,r1)
+      sino
+        si id=2
+          RecibirMensaje(ok,r2)
+        sino
+          RecibirMensaje(ok,r3)
+      
+      si ok
+        Random(tam,1,5)
+        si id=1
+          EnviarMensaje(tam,r1)
+        sino
+          si id=2
+            EnviarMensaje(tam,r2)
+          sino
+            EnviarMensaje(tam,r3)
+      sino
+        terminados:= terminados+1
+  fin
+  
+  proceso tomarflores(ES cant:numero)
+  comenzar
+    mientras HayFlorEnLaEsquina
+      tomarFlor
+      cant:= cant+1
+  fin
+  proceso ira5050(ES cant:numero)
+  comenzar
+    Pos(50,50){no bloquea, pq no va haber ningun otro robot}
+    tomarflores(cant)
+    Pos(22,1)
+  fin
+  
+{----------------------------------------------------------------------------------------------------}
+{PROCESOS CUADRADOS}
+  proceso lado (E tam:numero; ES flores:numero)
+  comenzar
+    repetir tam
+      tomarflores(flores)
+      mover
+  fin
+  
+  proceso cuadrado(E tam:numero; ES flores:numero)
+  comenzar
+    repetir 4
+      lado(tam,flores)
+      derecha
+  fin
+  
+  proceso depositaren5050(E flores:numero)
+  variables
+    av,ca:numero
+  comenzar
+    av:= PosAv
+    ca:= PosCa
+    repetir flores
+      BloquearEsquina(50,50)
+      
+      Pos(50,50)
+      depositarFlor
+      Pos(av,ca)
+      
+      LiberarEsquina(50,50)
+  fin
+  
+  proceso pedirtamano (E id:numero; ES tam:numero)
+  variables
+    ok:boolean
+  comenzar
+    ok:= V
+    EnviarMensaje(id,s)
+    EnviarMensaje(ok,s)
+    RecibirMensaje(tam,s)
+  fin
+  
+areas
+  area1: AreaP(1,1,6,16)
+  area2: AreaP(8,1,13,16)
+  area3: AreaP(15,1,20,16)
+  aserv: AreaP(22,1,22,1)
+  deposito: AreaC(50,50,50,50)
+robots
+  robot cuadrados
+  variables
+    id,tam,flores:numero
+    ok:boolean
+  comenzar
+    ok:= V
+    RecibirMensaje(id,s)
+    flores:= 0
+    pedirtamano(id,tam)
+    cuadrado(tam,flores)
+    repetir 2
+      Pos(PosAv,PosCa+tam)
+      pedirtamano(id,tam)
+      cuadrado(tam,flores)
+    depositaren5050(flores)
+    ok:= F
+    EnviarMensaje(id,s)
+    EnviarMensaje(ok,s)
+    
+  fin
+  
+  robot servidor
+  variables
+    cant:numero
+  comenzar
+    cant:= 0
+    cargarIDS
+    mandartamanos
+    ira5050(cant)
+    Informar(cant)
+  fin
+  
+variables
+  r1,r2,r3:cuadrados
+  s:servidor
+comenzar
+  AsignarArea(s,aserv)
+  AsignarArea(r1,area1)
+  AsignarArea(r2,area2)
+  AsignarArea(r3,area3)
+  AsignarArea(r1,deposito)
+  AsignarArea(r2,deposito)
+  AsignarArea(r3,deposito)
+  AsignarArea(s,deposito)
+  Iniciar(r1,1,1)
+  Iniciar(r2,8,1)
+  Iniciar(r3,15,1)
+  Iniciar(s,22,1)
+fin
