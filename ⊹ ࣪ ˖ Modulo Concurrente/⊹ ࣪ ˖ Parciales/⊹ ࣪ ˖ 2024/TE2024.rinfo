@@ -1,0 +1,131 @@
+{Turno E — Módulo Programación Concurrente
+IMPORTANTE: Utilice apellido_nombre como nombre del programa y como nombre 
+del archivo.
+
+Tres robots deben realizar 3 cuadrados cada uno, como se ejemplifica en la 
+figura, juntando todas las flores que encuentran a su paso. El tamaño de cada 
+cuadrado será determinado aleatoriamente entre 1 y 4 por cada robot. Al finalizar 
+cada cuadrado, deberán depositar de a una todas las flores encontradas en la 
+esquina (50,50). Cuando los robots terminan los 3 cuadrados, un robot coordinador 
+deberá informar qué robot recorrió más esquinas.
+
+Los robots inician en las esquinas (1,1), (7,1) y (14,1) y el robot coordinador 
+en la esquina (51,51).
+
+Referencia del diagrama: Ejemplo donde tres robots hacen 3 cuadrados de tamaño 
+aleatorio entre 1 y 10.}
+
+programa ejemplo
+procesos
+{-----------------------------------------------------------------------------------}
+{PROCESOS COORDINADOR}
+  proceso cargarIDS
+  comenzar
+    EnviarMensaje(1,r1)
+    EnviarMensaje(2,r2)
+    EnviarMensaje(3,r3)
+  fin
+  
+  proceso masesquinas
+  variables
+    max,id,esq,idmax:numero
+  comenzar
+    max:= -9999
+    repetir 3
+      RecibirMensaje(id,*)
+      si id=1
+        RecibirMensaje(esq,r1)
+      sino 
+        si id=2
+          RecibirMensaje(esq,r2)
+        sino
+          RecibirMensaje(esq,r3)
+      si esq>max
+        max:= esq
+        idmax:= id
+    Informar("el que recorrio mas esquinas fue ",idmax)
+  fin
+  
+{PROCESOS CUADRADOS}
+
+  proceso juntarflores(ES flores:numero)
+  comenzar
+    mientras HayFlorEnLaEsquina
+      tomarFlor
+      flores:= flores+1
+  fin
+  
+  proceso cuadrado(E tam:numero; ES flores:numero)
+  comenzar
+    repetir 4
+      repetir tam 
+        juntarflores(flores)
+        mover
+      derecha
+  fin
+
+  proceso depositar5050(E flores:numero)
+  variables
+    av,ca:numero
+  comenzar
+    av:= PosAv
+    ca:= PosCa
+    repetir flores
+      BloquearEsquina(50,50)
+  
+      Pos(50,50)
+      depositarFlor
+      Pos(av,ca)
+    
+      LiberarEsquina(50,50)
+  fin
+
+{-----------------------------------------------------------------------------------}
+areas
+  area1: AreaP(1,1,5,14){+1 para recorrer bien }
+  area2: AreaP(7,1,11,14)
+  area3: AreaP(14,1,18,14)
+  areaC: AreaP(51,51,51,51)
+  deposito: AreaPC(50,50,50,50)
+robots
+  robot cuadrados
+  variables
+    id,cantesq,tam,flores:numero
+  comenzar
+    RecibirMensaje(id,c)
+    cantesq:= 0
+    
+    repetir 3
+      flores:= 0
+      Random(tam,1,4)
+      cantesq:= cantesq+(4*tam)
+      cuadrado(tam,flores)
+      depositar5050(flores)
+      Pos(PosAv,PosCa+tam+1){+1 para que no recorra donde recorrio antes}
+      
+    EnviarMensaje(id,c)
+    EnviarMensaje(cantesq,c)
+  fin
+  
+  robot coordinador
+  comenzar
+    cargarIDS
+    masesquinas
+  fin
+  
+variables
+  r1,r2,r3:cuadrados
+  c:coordinador
+comenzar
+  AsignarArea(c,areaC)
+  AsignarArea(r1,area1)
+  AsignarArea(r2,area2)
+  AsignarArea(r3,area3)
+  AsignarArea(r1,deposito)
+  AsignarArea(r2,deposito)
+  AsignarArea(r3,deposito)
+  Iniciar(c,51,51)
+  Iniciar(r1,1,1)
+  Iniciar(r2,7,1)
+  Iniciar(r3,14,1)
+fin
