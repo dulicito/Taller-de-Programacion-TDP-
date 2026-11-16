@@ -3,7 +3,7 @@
 <img src="https://i.pinimg.com/736x/80/f2/78/80f278dbe03db7e3d4ec4f8efec2cc46.jpg" width="" height="">
 
 
-> ⋆. 𐙚 ˚resoluciones propias sobre ejercicios de la materia 'taller de programación' dictada en el 2do cuatrimestre de primer año.
+> ⋆. 𐙚 ˚resoluciones propias sobre ejercicios de la materia 'taller de programación' dictada en el 2do cuatrimestre de primer año. ; dsp ordeno el readme turutururururu
 
 
 <a href="https://drive.google.com/drive/folders/1Zima9quYKk92Z_nyHdGYrtXfBaZAGnwu" target="_blank">ᝰ.ᐟ Drive (Material Cursada Completa)</a>
