@@ -1,0 +1,238 @@
+
+
+{# Turno D — Módulo Programación Concurrente
+
+**IMPORTANTE:** Utilice apellido_nombre como nombre del programa y como 
+nombre del archivo.
+
+Existen tres robots sembradores: dos papeleros RP1 y RP2 que depositan 
+un papel en las esquinas sin papel de sus respectivas calles y un robot 
+florero RF que deposita una flor en cada esquina sin flor de una avenida 
+aleatoria entre 2 y 35, indicada por un robot fiscalizador.
+
+Cuando los tres sembradores terminan su tarea, el fiscalizador debe indicar 
+al sembrador que terminó primero que vuelva a su esquina inicial, e informar 
+la cantidad de elementos (flor o papel) que depositó dicho sembrador.
+
+Las esquinas de inicio son: RP1 en (1,8), RP2 en (1,15), RF en (1,2) y el 
+fiscalizador en (1,1).
+
+Configure el entorno para que los sembradores cuenten con flores suficientes 
+en su bolsa.}
+
+programa ejemplo
+procesos
+  {-------------------------------------------------------------------------------------}
+  {PROCESOS FISCAL}
+  
+  proceso cargarIDS
+  comenzar
+    EnviarMensaje(1,rp1)
+    EnviarMensaje(2,rp2)
+    EnviarMensaje(3,rf)
+  fin
+  
+  proceso mandarmsjpos(E idprimero:numero)
+  comenzar
+    si idprimero=1
+      EnviarMensaje(V,rp1)
+      EnviarMensaje(F,rp2)
+      EnviarMensaje(F,rf)
+    sino
+      si idprimero=2
+        EnviarMensaje(V,rp2)
+        EnviarMensaje(F,rp1)
+        EnviarMensaje(F,rf)
+      sino 
+        EnviarMensaje(V,rf)
+        EnviarMensaje(F,rp1)
+        EnviarMensaje(F,rp2)
+  fin
+  
+  proceso enviaravenidaaleatoria
+  variables
+    av:numero
+  comenzar
+    Random(av,2,35)
+    EnviarMensaje(av,rp1)
+    EnviarMensaje(av,rp2)
+    EnviarMensaje(av,rf)
+  fin
+  
+  proceso primeroenterminar
+  variables
+    orden,id,cant,idprimero,cantprimero:numero
+  comenzar
+    orden:= 0
+    repetir 3
+      RecibirMensaje(id,*)
+      si id=1
+        RecibirMensaje(cant,rp1)
+      sino 
+        si id=2
+          RecibirMensaje(cant,rp2)
+        sino
+          RecibirMensaje(cant,rf)
+      orden:= orden+1
+      si orden=1
+        idprimero:= id
+        cantprimero:= cant
+    mandarmsjpos(idprimero)
+    Informar("primero en llegar ",idprimero)
+    Informar("con cantidad ",cantprimero)
+  fin
+  {------------------------------------------------------------------------------------}
+  {PROCESOS PAPELERO}  
+  proceso posinicial(E av:numero; E ca:numero)
+  comenzar
+    Pos(av,ca)
+  fin
+  proceso esquinavaciap(ES papelesdepositados:numero)
+  comenzar
+    si ~HayPapelEnLaEsquina
+      depositarPapel
+      papelesdepositados:= papelesdepositados+1
+  fin
+  
+  proceso recorrerpapelero(E recorrer:numero; ES papelesdepositados:numero)
+  comenzar
+    repetir recorrer 
+      esquinavaciap(papelesdepositados)
+      mover
+  fin
+  
+  proceso crucepapelero(ES papelesdep:numero; E avrandom:numero)
+  comenzar
+    esquinavaciap(papelesdep)
+    BloquearEsquina(avrandom,PosCa)
+    mover
+    esquinavaciap(papelesdep)
+    mover
+    LiberarEsquina(avrandom,PosCa)
+  fin
+  {-------------------------------------------------------------------------------------}
+  {PROCESOS FLORERO}
+  
+  proceso esquinavaciaf(ES floresdep:numero)
+  comenzar
+    si ~HayFlorEnLaEsquina
+      depositarFlor
+      floresdep:= floresdep+1
+  fin
+  
+  proceso recorrerflorero(E cantarecorrer:numero; ES floresdep:numero)
+  comenzar
+    repetir cantarecorrer
+      esquinavaciaf(floresdep)
+      mover
+  fin
+  
+  proceso cruceflorero(ES floresdep:numero)
+  comenzar
+    esquinavaciaf(floresdep)
+    BloquearEsquina(PosAv,PosCa+1)
+    mover
+    esquinavaciaf(floresdep)
+    mover
+    LiberarEsquina(PosAv,PosCa-1)
+  fin
+  
+  {------------------------------------------------------------------------------------}  
+areas
+  areaf: AreaP(1,1,1,1)
+  {calle 8: rp1}
+  c8ini: AreaP(1,8,1,8)
+  c8cruce: AreaPC(2,8,35,8)
+  c8fin: AreaP(36,8,100,8)
+  {calle 15: rp2}
+  c15ini: AreaP(1,15,1,15)
+  c15cruce: AreaPC(2,15,35,15)
+  c15fin: AreaP(36,15,100,15)
+  {avenidas 2 a 35: rf, sin las calles 8 y 15}
+  rfini: AreaP(1,2,1,2)
+  rftramo1: AreaP(2,1,35,7)
+  rftramo2: AreaP(2,9,35,14)
+  rftramo3: AreaP(2,16,35,100)
+robots
+  robot papelero
+  variables
+    id,avenidarandom,av,ca,papelesdepositados,cantarecorrer:numero
+    ok:boolean
+  comenzar
+    RecibirMensaje(id,f)
+    RecibirMensaje(avenidarandom,f)
+    av:= PosAv
+    ca:= PosCa
+    papelesdepositados:= 0
+    derecha
+    cantarecorrer:= avenidarandom-2
+    recorrerpapelero(cantarecorrer,papelesdepositados)
+    crucepapelero(papelesdepositados,avenidarandom)
+    cantarecorrer:= 99-avenidarandom
+    recorrerpapelero(cantarecorrer,papelesdepositados)
+    esquinavaciap(papelesdepositados)
+    EnviarMensaje(id,f)
+    EnviarMensaje(papelesdepositados,f)
+    RecibirMensaje(ok,f)
+    si ok
+      posinicial(av,ca)
+    
+  fin
+  
+  robot florero
+  variables
+    id,avenidarandom,av,ca,floresdep,cantarecorrer:numero
+    ok:boolean
+  comenzar
+    RecibirMensaje(id,f)
+    RecibirMensaje(avenidarandom,f)
+    av:= PosAv
+    ca:= PosCa
+    Pos(avenidarandom,1)
+    floresdep:= 0
+    cantarecorrer:=7-1
+    recorrerflorero(cantarecorrer,floresdep)
+    cruceflorero(floresdep)
+    cantarecorrer:= 5
+    recorrerflorero(cantarecorrer,floresdep)
+    cruceflorero(floresdep)
+    cantarecorrer:= 100-16
+    recorrerflorero(cantarecorrer,floresdep)
+    esquinavaciaf(floresdep)
+    EnviarMensaje(id,f)
+    EnviarMensaje(floresdep,f)
+    RecibirMensaje(ok,f)
+    si ok
+      posinicial(av,ca)
+  fin
+  
+  robot fiscal
+  comenzar
+    cargarIDS
+    enviaravenidaaleatoria{envio avenida a cada robot para maximizar concurrencia}
+    primeroenterminar
+  fin
+  
+variables
+  rp1,rp2:papelero
+  rf:florero
+  f:fiscal
+comenzar
+  AsignarArea(f,areaf)
+  AsignarArea(rp1,c8ini)
+  AsignarArea(rp1,c8cruce)
+  AsignarArea(rp1,c8fin)
+  AsignarArea(rp2,c15ini)
+  AsignarArea(rp2,c15cruce)
+  AsignarArea(rp2,c15fin)
+  AsignarArea(rf,rfini)
+  AsignarArea(rf,rftramo1)
+  AsignarArea(rf,rftramo2)
+  AsignarArea(rf,rftramo3)
+  AsignarArea(rf,c8cruce)
+  AsignarArea(rf,c15cruce)
+  Iniciar(rp1,1,8)
+  Iniciar(rp2,1,15)
+  Iniciar(rf,1,2)
+  Iniciar(f,1,1)
+fin
